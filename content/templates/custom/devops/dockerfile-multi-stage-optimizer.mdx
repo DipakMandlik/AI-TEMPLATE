@@ -1,0 +1,96 @@
+---
+title: Dockerfile Multi-Stage Optimizer
+description: A provider-agnostic prompt for any agent that rewrites a single-stage Dockerfile into a multi-stage build, shrinking image size and removing build-time secrets from the final layer.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - custom
+  - claude-code
+  - aider
+tags:
+  - docker
+  - devops
+  - performance
+  - security
+difficulty: intermediate
+license: MIT
+useCases:
+  - Shrinking a production image that currently ships the entire build toolchain
+  - Removing an npm/pip credential accidentally baked into a final image layer
+  - Standardizing Dockerfiles across services that were each written differently
+bestPractices:
+  - Copy only the final build artifact into the runtime stage, never the whole build context
+  - Use a minimal runtime base image (distroless or -slim) for the final stage
+  - Order layers so infrequently-changing dependencies are installed before frequently-changing source code
+limitations:
+  - Cannot verify the resulting image still runs correctly — always test the built image before deploying
+  - Assumes a standard build tool (npm/pip/go build); unusual build systems may need manual adjustment
+examples:
+  - title: Splits a bloated single-stage Node.js Dockerfile
+    input: |
+      FROM node:20
+      WORKDIR /app
+      COPY . .
+      RUN npm ci && npm run build
+      CMD ["node", "dist/server.js"]
+    output: |
+      ```dockerfile
+      FROM node:20 AS builder
+      WORKDIR /app
+      COPY package*.json ./
+      RUN npm ci
+      COPY . .
+      RUN npm run build && npm prune --omit=dev
+
+      FROM node:20-slim
+      WORKDIR /app
+      COPY --from=builder /app/dist ./dist
+      COPY --from=builder /app/node_modules ./node_modules
+      COPY --from=builder /app/package.json ./
+      CMD ["node", "dist/server.js"]
+      ```
+      This drops the full dev toolchain from the final image and only ships the compiled
+      output plus production dependencies.
+  - title: Removes a leaked build secret from the final layer
+    input: |
+      RUN --mount=type=secret,id=npmrc cp /run/secrets/npmrc .npmrc && npm ci && rm .npmrc
+    output: |
+      Deleting `.npmrc` in the same `RUN` layer still leaves it in that layer's history in
+      older Docker versions without BuildKit — confirm BuildKit is enabled
+      (`DOCKER_BUILDKIT=1`) so `--mount=type=secret` never writes the secret to any layer
+      at all, which is what this line is already attempting to do correctly.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+A single-stage Dockerfile typically ships the entire build toolchain, source maps, dev
+dependencies, and sometimes build-time secrets into production. This prompt is intentionally
+provider-agnostic — it works as a Claude Code slash command, a Cursor rule, or a plain prompt
+pasted into any chat-based agent — since "shrink this Dockerfile" isn't tool-specific.
+
+## The prompt
+
+```md
+Rewrite this Dockerfile as a multi-stage build:
+
+1. Separate the build stage (full toolchain, dev dependencies) from the runtime stage
+   (minimal base image, only what's needed to run the app).
+2. Copy only the compiled/built artifact and production dependencies into the final
+   stage — never the raw source, build cache, or dev tooling.
+3. Check for any secret (npm token, pip credential, API key) used during the build and
+   confirm it cannot end up in the final image's layer history; use BuildKit secret
+   mounts (`--mount=type=secret`) instead of `ARG`/`ENV` for anything sensitive.
+4. Order instructions so dependency installation is cached separately from source code
+   copies — dependencies change far less often than application code.
+
+Show the full rewritten Dockerfile and explain each change.
+```

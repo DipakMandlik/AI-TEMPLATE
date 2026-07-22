@@ -1,0 +1,85 @@
+---
+title: Pandas DataFrame Optimizer
+description: An OpenAI prompt that rewrites slow pandas code — row-wise loops, chained indexing, unnecessary copies — into vectorized operations with the same output.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - openai
+  - gemini
+  - claude-code
+tags:
+  - python
+  - pandas
+  - performance
+  - data
+difficulty: intermediate
+license: MIT
+useCases:
+  - Speeding up a data pipeline step that's become a bottleneck on larger datasets
+  - Reviewing a data science notebook before it's productionized
+  - Teaching vectorized pandas patterns to someone coming from a row-by-row mindset
+bestPractices:
+  - Prefer vectorized operations (`.apply` last resort, row loops never) for anything performance-sensitive
+  - Avoid chained indexing (`df[df.x > 0]['y'] = 1`) — use `.loc` to assign in one step
+  - Set dtypes explicitly for large categorical columns instead of leaving them as generic object columns
+limitations:
+  - Correctness of the vectorized rewrite must still be verified against the original output
+  - Some genuinely row-dependent logic (stateful across rows) cannot be fully vectorized
+examples:
+  - title: Vectorizes a row-wise loop
+    input: |
+      total = 0
+      for i, row in df.iterrows():
+          if row['status'] == 'paid':
+              total += row['amount']
+      df['running_total'] = total
+    output: |
+      ```python
+      total = df.loc[df["status"] == "paid", "amount"].sum()
+      df["running_total"] = total
+      ```
+      `iterrows()` is one of the slowest ways to touch a DataFrame — this replaces the
+      entire loop with a single vectorized boolean mask and `.sum()`.
+  - title: Fixes chained indexing that silently fails to assign
+    input: |
+      df[df['score'] > 90]['grade'] = 'A'
+    output: |
+      This chained indexing assigns to a temporary copy and raises (or silently no-ops)
+      a `SettingWithCopyWarning` — it does not reliably modify `df`. Use
+      `df.loc[df["score"] > 90, "grade"] = "A"` instead, which assigns in one step.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+Row-wise loops (`iterrows`, `.apply(axis=1)`) and chained indexing are the two most common
+sources of both slow and subtly incorrect pandas code. This prompt finds both and rewrites
+them to vectorized equivalents that produce the same result faster and without the silent
+assignment failures chained indexing can cause.
+
+## The prompt
+
+```md
+Review this pandas code for performance and correctness issues:
+
+1. Replace any `.iterrows()`, `.itertuples()`, or `.apply(axis=1)` loop with a
+   vectorized equivalent wherever the per-row logic can be expressed as a boolean
+   mask, arithmetic, or `.map`/`.replace` operation. If it genuinely can't be
+   vectorized (truly stateful across rows), say so explicitly.
+2. Replace chained indexing (`df[mask]['col'] = value`) with `.loc[mask, "col"] = value`
+   — chained indexing can silently fail to assign or raise `SettingWithCopyWarning`.
+3. Flag any large `object`-dtype column that holds a small number of repeated values
+   and would benefit from being cast to `category` dtype.
+4. Confirm the vectorized rewrite produces the same output as the original for a
+   representative sample before considering it done.
+
+Show the rewritten code and explain what changed and why.
+```

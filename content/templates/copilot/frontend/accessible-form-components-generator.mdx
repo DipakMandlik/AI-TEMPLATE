@@ -1,0 +1,91 @@
+---
+title: Accessible Form Components Generator
+description: A GitHub Copilot prompt that scaffolds React form fields with correct label association, error messaging, and keyboard behavior baked in from the start.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - copilot
+  - cursor
+  - claude-code
+tags:
+  - accessibility
+  - react
+  - forms
+  - wcag
+difficulty: beginner
+license: MIT
+useCases:
+  - Building a new signup/checkout/settings form from scratch
+  - Retrofitting accessibility onto an existing form component
+  - Teaching a team the baseline pattern for accessible form fields
+bestPractices:
+  - Always associate a `<label>` with its input via `htmlFor`/`id`, never placeholder-only labels
+  - Announce validation errors with `aria-describedby` and `role="alert"`, not color alone
+  - Make required fields both visually and programmatically indicated (`aria-required`)
+limitations:
+  - Covers standard text/select/checkbox fields, not complex custom widgets (date pickers, combobox)
+  - Does not replace running an actual screen reader pass before shipping
+examples:
+  - title: Generates an accessible text field with error state
+    input: Create an accessible email input field with validation error support.
+    output: |
+      ```tsx
+      function EmailField({ error, ...props }: { error?: string } & React.ComponentProps<'input'>) {
+        const id = useId()
+        const errorId = `${id}-error`
+        return (
+          <div>
+            <label htmlFor={id}>Email</label>
+            <input
+              id={id}
+              type="email"
+              aria-required="true"
+              aria-invalid={!!error}
+              aria-describedby={error ? errorId : undefined}
+              {...props}
+            />
+            {error && <p id={errorId} role="alert">{error}</p>}
+          </div>
+        )
+      }
+      ```
+  - title: Fixes a placeholder-as-label anti-pattern
+    input: |
+      <input type="text" placeholder="Full name" />
+    output: |
+      Placeholders disappear on input and aren't reliably announced by screen readers.
+      Add a visible `<label>` associated via `htmlFor`/`id`, and keep the placeholder
+      only as supplementary formatting help if needed.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+Forms are one of the highest-impact places to get accessibility right — they're the primary
+way users provide input, and the most common place `label`/`input` association and error
+announcement get skipped under deadline pressure. This prompt bakes the correct pattern in
+from the first draft.
+
+## The prompt
+
+```md
+Generate a React form field component with these requirements, non-negotiable:
+
+1. Every input has a visible `<label>` associated via `htmlFor`/`id` — never rely on
+   `placeholder` or `aria-label` alone as the only label.
+2. Required fields set `aria-required="true"` and show a visible indicator (not color alone).
+3. Validation errors are associated via `aria-describedby` pointing at an element with
+   `role="alert"`, and the input sets `aria-invalid="true"` while an error is present.
+4. All interactive elements are reachable and operable via keyboard alone — no
+   click-only handlers on non-interactive elements.
+
+Generate the component now for the field type I specify, following this pattern exactly.
+```

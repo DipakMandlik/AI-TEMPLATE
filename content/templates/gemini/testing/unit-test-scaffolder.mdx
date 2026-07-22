@@ -1,0 +1,95 @@
+---
+title: Unit Test Scaffolder
+description: A Gemini prompt that generates a real unit test suite for a given function — meaningful edge cases and failure modes, not just a happy-path smoke test.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - gemini
+  - openai
+  - claude-code
+tags:
+  - testing
+  - unit-tests
+  - vitest
+  - jest
+difficulty: beginner
+license: MIT
+useCases:
+  - Scaffolding a first test suite for an untested utility function
+  - Filling in edge-case coverage a reviewer flagged as missing
+  - Generating tests for a function ahead of a refactor, as a safety net
+bestPractices:
+  - Test behavior (inputs → outputs), not implementation details that could change harmlessly
+  - Cover boundary values explicitly (empty arrays, zero, negative numbers, max length)
+  - One assertion concept per test — a failing test name should tell you what broke
+limitations:
+  - Cannot know which edge cases matter for your specific domain — review and add domain-specific ones
+  - Generated tests are a starting point, not a substitute for testing actual integration points
+examples:
+  - title: Generates real edge-case coverage, not just the happy path
+    input: |
+      function chunk<T>(items: T[], size: number): T[][] {
+        if (size <= 0) throw new Error("size must be positive")
+        const out: T[][] = []
+        for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size))
+        return out
+      }
+    output: |
+      ```ts
+      describe("chunk", () => {
+        it("splits an array into equal-sized groups", () => {
+          expect(chunk([1, 2, 3, 4], 2)).toEqual([[1, 2], [3, 4]]);
+        });
+        it("includes a smaller final group when it doesn't divide evenly", () => {
+          expect(chunk([1, 2, 3], 2)).toEqual([[1, 2], [3]]);
+        });
+        it("returns an empty array for empty input", () => {
+          expect(chunk([], 3)).toEqual([]);
+        });
+        it("throws for a non-positive size", () => {
+          expect(() => chunk([1], 0)).toThrow("size must be positive");
+        });
+      });
+      ```
+  - title: Flags a happy-path-only test as insufficient
+    input: |
+      it("chunks an array", () => {
+        expect(chunk([1, 2, 3, 4], 2)).toEqual([[1, 2], [3, 4]]);
+      });
+    output: |
+      This only covers the case where the array divides evenly. Add cases for an
+      uneven final chunk, empty input, and the `size <= 0` error path — all three are
+      one-line changes away from breaking silently without a test.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+A test suite that only covers the happy path gives false confidence — it passes today and
+still passes after a regression in an edge case nobody tested. This prompt generates a suite
+that explicitly covers boundary values and failure modes alongside normal usage.
+
+## The prompt
+
+```md
+Generate a unit test suite for this function. Requirements:
+
+1. Cover the normal/happy-path case first.
+2. Cover boundary values explicitly: empty input, zero, negative numbers, the smallest
+   and largest realistic sizes, and any off-by-one edge implied by the implementation
+   (e.g. a final partial chunk, a single-element array).
+3. Cover every explicit error/throw path in the function with its own test.
+4. Give each test a name that describes the behavior being verified, so a failure is
+   understandable from the test name alone without reading the test body.
+5. Use one assertion concept per test — don't bundle unrelated checks into one `it`.
+
+Generate the suite now, using the project's existing test framework conventions.
+```

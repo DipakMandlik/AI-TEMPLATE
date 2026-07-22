@@ -1,0 +1,88 @@
+---
+title: Playwright E2E Test Generator
+description: A GitHub Copilot prompt that turns a described user flow into a resilient Playwright test — role-based locators, explicit waits, no brittle CSS selectors.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - copilot
+  - cursor
+  - windsurf
+tags:
+  - testing
+  - playwright
+  - e2e
+  - automation
+difficulty: intermediate
+license: MIT
+useCases:
+  - Writing the first e2e test for a new golden-path user flow
+  - Converting a manual QA checklist into an automated regression test
+  - Onboarding a contributor unfamiliar with Playwright's locator best practices
+bestPractices:
+  - Prefer `getByRole`/`getByLabel`/`getByText` over CSS selectors or test IDs where possible
+  - Let Playwright's auto-waiting do the work — avoid manual `waitForTimeout` calls
+  - Assert on user-visible outcomes (text, visibility), not implementation details like class names
+limitations:
+  - Cannot generate assertions for behavior it wasn't told about — describe the expected outcome explicitly
+  - Does not set up test data/fixtures — assumes the described starting state already exists
+examples:
+  - title: Converts a manual test case into a Playwright test
+    input: |
+      Manual test: "Log in with valid credentials, add an item to the cart, and verify
+      the cart badge shows 1."
+    output: |
+      ```ts
+      test("adding an item updates the cart badge", async ({ page }) => {
+        await page.goto("/login");
+        await page.getByLabel("Email").fill("user@example.com");
+        await page.getByLabel("Password").fill("correct-password");
+        await page.getByRole("button", { name: "Sign in" }).click();
+
+        await page.getByRole("button", { name: "Add to cart" }).first().click();
+        await expect(page.getByRole("status", { name: /cart/i })).toHaveText("1");
+      });
+      ```
+  - title: Replaces a flaky waitForTimeout with a real wait condition
+    input: |
+      await page.click('.submit-btn')
+      await page.waitForTimeout(2000)
+      expect(await page.locator('.success').isVisible()).toBe(true)
+    output: |
+      Replace the arbitrary 2-second wait with an assertion that waits automatically:
+      `await expect(page.getByRole("status", { name: /success/i })).toBeVisible();` —
+      this passes as soon as the element appears and fails fast if it never does,
+      instead of always taking 2 seconds and still racing if it's slower than that.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+The fastest way to end up with a flaky e2e suite is CSS-selector locators and manual
+`waitForTimeout` calls. This prompt generates tests that use Playwright's role-based locators
+and auto-waiting assertions from the start, which are both more readable and more resilient to
+markup changes.
+
+## The prompt
+
+```md
+Write a Playwright test for the user flow I describe. Requirements:
+
+1. Use `getByRole`, `getByLabel`, or `getByText` for every locator. Only fall back to
+   `data-testid` if there's truly no accessible way to target the element, and say so
+   explicitly when you do.
+2. Never use `page.waitForTimeout`. Rely on Playwright's built-in auto-waiting via
+   `expect(locator).toBeVisible()` / `.toHaveText()` etc.
+3. Assert on what the user would actually see (visible text, ARIA state), not
+   implementation details like class names or DOM structure.
+4. Keep each test focused on one flow; split unrelated assertions into separate tests.
+
+Describe the flow now, and I'll generate the test.
+```

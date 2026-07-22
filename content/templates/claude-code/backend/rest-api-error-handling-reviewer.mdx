@@ -1,0 +1,87 @@
+---
+title: REST API Error Handling Reviewer
+description: A Claude Code subagent that audits Express/Fastify/Nest route handlers for inconsistent error responses, swallowed exceptions, and missing status codes.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - claude-code
+  - cursor
+  - cline
+tags:
+  - api
+  - error-handling
+  - nodejs
+  - code-review
+  - backend
+difficulty: intermediate
+license: MIT
+useCases:
+  - Reviewing a new route handler before merge
+  - Auditing an existing API for inconsistent error shapes across endpoints
+  - Standardizing error responses when several services are merged into one API
+bestPractices:
+  - "Return a consistent error envelope (e.g. `{ error: { code, message } }`) from every route"
+  - Never swallow an exception silently — log it with enough context to reproduce
+  - Map domain errors to HTTP status codes explicitly, don't default everything to 500
+limitations:
+  - Does not verify the error envelope matches what client code actually expects
+  - Cannot detect errors thrown from within third-party middleware
+examples:
+  - title: Catches a swallowed exception
+    input: |
+      app.post('/orders', async (req, res) => {
+        try {
+          const order = await createOrder(req.body)
+          res.json(order)
+        } catch (e) {
+          res.status(500).json({ ok: false })
+        }
+      })
+    output: |
+      The catch block discards `e` entirely — nothing is logged, so a failure here is
+      invisible in production. Log `e` with the request ID, and return the actual error
+      code (e.g. 400 for validation failures from `createOrder`, not a blanket 500).
+  - title: Flags an inconsistent error shape
+    input: |
+      // orders.ts
+      res.status(400).json({ error: 'Invalid amount' })
+      // users.ts
+      res.status(400).json({ message: 'Invalid email', code: 'INVALID_EMAIL' })
+    output: |
+      Two different error shapes for the same status code. Standardize on one envelope,
+      e.g. `{ error: { code: 'INVALID_EMAIL', message: 'Invalid email' } }`, and apply it
+      to both handlers.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+APIs built incrementally by different contributors tend to accumulate inconsistent error
+handling — some routes swallow exceptions, some return ad hoc shapes, some default everything
+to a 500. This subagent reviews route handlers specifically for those failure modes.
+
+## The prompt
+
+```md
+You are auditing REST API route handlers for error-handling quality. For each handler:
+
+1. Confirm every `catch` block does something with the caught error — at minimum,
+   structured logging with enough context to reproduce the failure. Flag any catch
+   block that only returns a generic response without logging.
+2. Confirm the HTTP status code reflects the actual failure: validation errors → 400,
+   auth failures → 401/403, not-found → 404, only truly unexpected failures → 500.
+3. Confirm the JSON error shape is consistent with the rest of the codebase — same
+   field names, same nesting, across every handler you review.
+4. Flag any route with no error handling at all (a rejected promise that isn't caught
+   anywhere up the call stack).
+
+List findings per file, most severe first, and propose the corrected code for each one.
+```

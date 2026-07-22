@@ -1,0 +1,80 @@
+---
+title: API Reference Generator
+description: A Claude Code command that generates accurate Markdown API reference documentation directly from TypeScript function signatures and JSDoc comments — no hand-written drift.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - claude-code
+  - cursor
+  - continue-dev
+tags:
+  - documentation
+  - typescript
+  - api-reference
+  - developer-experience
+difficulty: beginner
+license: MIT
+useCases:
+  - Generating a docs/api.md file for a package's public exports
+  - Keeping API reference docs in sync after a signature change
+  - Documenting an internal library for other teams to consume
+bestPractices:
+  - Generate docs from the actual exported types, not from memory of what the API "should" be
+  - Include at least one usage example per exported function, not just the signature
+  - Note when a parameter is optional and what the default behavior is if omitted
+limitations:
+  - Quality depends on existing JSDoc comments — sparse comments produce sparse docs
+  - Does not document runtime behavior that isn't expressed in the type signature
+examples:
+  - title: Documents an exported function from its signature and JSDoc
+    input: |
+      /** Merge conditional class names and resolve conflicting Tailwind utilities. */
+      export function cn(...inputs: ClassValue[]): string
+    output: |
+      ### `cn(...inputs: ClassValue[]): string`
+
+      Merge conditional class names and resolve conflicting Tailwind utility classes.
+
+      ```ts
+      cn("p-2", isLarge && "p-4") // => "p-4"
+      ```
+  - title: Flags an export with no documentation to generate from
+    input: |
+      export function resolveConfig(path: string, opts: any): unknown
+    output: |
+      This export has no JSDoc comment and an `any`/`unknown` signature — there isn't
+      enough information here to generate an accurate reference entry. Add a JSDoc
+      comment describing what it does and tighten the types before documenting it.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+Hand-written API docs drift from the actual code the moment a signature changes. This command
+generates reference documentation directly from a package's exported TypeScript types and
+JSDoc comments, so the docs can be regenerated on demand instead of manually kept in sync.
+
+## The prompt
+
+```md
+Generate Markdown API reference documentation for this module's public exports:
+
+1. For every exported function/class/type, include its exact signature as written in
+   the source — do not paraphrase or "clean up" the types.
+2. Pull the description from its JSDoc comment. If there is no JSDoc comment, say so
+   explicitly instead of inventing a description.
+3. Include at least one realistic usage example per export, derived from how it's
+   actually called elsewhere in this codebase if such a call site exists.
+4. Note which parameters are optional and what happens when they're omitted.
+5. Group exports by the file they come from, in the order they're exported.
+
+Output one Markdown section per export, ready to paste into docs/api.md.
+```

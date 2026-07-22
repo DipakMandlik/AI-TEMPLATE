@@ -1,0 +1,79 @@
+---
+title: SQL Query Performance Reviewer
+description: A Cursor rule that reviews ORM-generated and hand-written SQL for missing indexes, N+1 query patterns, and unbounded result sets before they reach production.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - cursor
+  - claude-code
+  - roo-code
+tags:
+  - sql
+  - performance
+  - database
+  - code-review
+difficulty: advanced
+license: MIT
+useCases:
+  - Reviewing a PR that adds a new query or changes an existing one
+  - Auditing an ORM layer (Prisma, Drizzle, TypeORM) for N+1 patterns after a slow-endpoint report
+  - Establishing a checklist new backend engineers use before merging query changes
+bestPractices:
+  - Always paginate queries that can return an unbounded number of rows
+  - Batch-load related records (`include`/`with`) instead of querying inside a loop
+  - Add an index for any column used in a frequent `WHERE`, `JOIN`, or `ORDER BY` clause
+limitations:
+  - Cannot see actual query plans (EXPLAIN output) — pair with real profiling before optimizing further
+  - Recommendations assume a relational database; does not cover NoSQL access patterns
+examples:
+  - title: Catches an N+1 query inside a loop
+    input: |
+      const orders = await db.order.findMany()
+      for (const order of orders) {
+        order.customer = await db.customer.findUnique({ where: { id: order.customerId } })
+      }
+    output: |
+      This issues one query per order (N+1). Load customers in a single batched query
+      instead: `db.order.findMany({ include: { customer: true } })`, or fetch all needed
+      customer IDs up front with `db.customer.findMany({ where: { id: { in: ids } } })`.
+  - title: Flags an unbounded, unindexed query
+    input: |
+      SELECT * FROM events WHERE user_id = ? ORDER BY created_at DESC
+    output: |
+      Two issues: no `LIMIT`, so this can return an unbounded result set as event volume
+      grows; and no visible index on `(user_id, created_at)`, so this will do a full scan
+      once the table is large. Add `LIMIT` with cursor-based pagination, and add a
+      composite index on `(user_id, created_at)`.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+Query performance problems are cheap to fix in review and expensive to fix in production once
+a table has grown. This rule catches the three patterns that account for most real-world
+slow-query incidents: N+1 loops, unbounded result sets, and missing indexes on hot paths.
+
+## The prompt
+
+```md
+Review this database query code for performance issues:
+
+1. Flag any query issued inside a loop over another query's results (N+1 pattern).
+   Recommend the batched/`include`-based alternative.
+2. Flag any query with no `LIMIT` (or ORM equivalent) that could return an unbounded
+   number of rows as the table grows. Recommend pagination.
+3. For any `WHERE`, `JOIN`, or `ORDER BY` clause on a column, ask whether that column
+   is indexed; if you can't tell from the code alone, say so explicitly rather than
+   assuming either way.
+4. Flag any `SELECT *` where only a few columns are actually used downstream.
+
+List findings in order of likely production impact, most severe first.
+```

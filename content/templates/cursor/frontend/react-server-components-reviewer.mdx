@@ -1,0 +1,88 @@
+---
+title: React Server Components Reviewer
+description: A Cursor rule that reviews Next.js App Router code for Server/Client Component boundary mistakes, data-fetching waterfalls, and accidental client bundle bloat.
+author:
+  name: AI-TEMPLATE Maintainers
+  github: DipakMandlik
+version: 1.0.0
+compatibility:
+  - cursor
+  - claude-code
+  - windsurf
+tags:
+  - react
+  - nextjs
+  - server-components
+  - code-review
+  - app-router
+difficulty: intermediate
+license: MIT
+useCases:
+  - Reviewing a pull request that adds or changes files under app/
+  - Auditing an existing Next.js codebase for accidental "use client" overuse
+  - Onboarding a team migrating from the Pages Router to the App Router
+bestPractices:
+  - Keep "use client" boundaries as low (leaf-level) in the tree as possible
+  - Fetch data in Server Components and pass serializable props down, not the other way around
+  - Co-locate loading.tsx and error.tsx with the routes they guard
+limitations:
+  - Cannot verify runtime behavior — pair with real testing, not just static review
+  - Does not evaluate whether Suspense boundaries are placed for optimal streaming
+examples:
+  - title: Flags an unnecessary "use client" directive
+    input: |
+      'use client'
+      export default async function ProductPage({ params }) {
+        const product = await getProduct(params.id)
+        return <ProductDetails product={product} />
+      }
+    output: |
+      Remove `"use client"` — this component calls `await` directly and renders no
+      interactive elements, so it can run as a Server Component. Move any
+      interactivity into a small child Client Component instead.
+  - title: Catches a client-side data-fetching waterfall
+    input: |
+      'use client'
+      function Dashboard() {
+        const [user, setUser] = useState(null)
+        useEffect(() => { fetchUser().then(setUser) }, [])
+        return user ? <Widgets userId={user.id} /> : <Spinner />
+      }
+    output: |
+      This fetches `user` on the client after mount, delaying everything below it.
+      Fetch `user` in a parent Server Component and pass `userId` down as a prop
+      instead — it removes a full network round-trip from the critical path.
+changelog:
+  - version: 1.0.0
+    date: "2026-07-22"
+    changes:
+      - Initial release
+createdAt: "2026-07-22"
+updatedAt: "2026-07-22"
+---
+
+## Overview
+
+This rule teaches Cursor (or any tool that reads project-level rule files) to catch the most
+common App Router mistakes during code review: components marked `"use client"` that don't
+need to be, data fetched client-side when it could happen on the server, and missing
+`loading.tsx`/`error.tsx` boundaries for routes that stream.
+
+## The prompt
+
+```md
+You are reviewing a Next.js App Router change. For every file under `app/`:
+
+1. Flag any `"use client"` directive on a component that does not use state, effects,
+   browser-only APIs, or event handlers. Explain what to remove and why the component
+   can be a Server Component instead.
+2. Flag any `useEffect` + `fetch` pattern that could instead be an `await` inside a
+   Server Component, passing the result down as a prop.
+3. Confirm every route segment with an async Server Component has a sibling
+   `loading.tsx`; if missing, suggest adding one.
+4. Confirm `params` and `searchParams` are awaited (they are Promises), not destructured
+   synchronously.
+
+Report findings as a bullet list grouped by file, most severe first. Do not rewrite the
+code unless asked — describe the fix.
+```
