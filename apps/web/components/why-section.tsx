@@ -21,7 +21,7 @@ export function WhySection() {
           see the full audit in{" "}
           <a
             href="https://github.com/DipakMandlik/AI-TEMPLATE/blob/main/roadmap.md"
-            className="text-[var(--color-brand-600)] underline-offset-4 hover:underline"
+            className="text-[var(--color-brand-600)] underline underline-offset-4"
           >
             roadmap.md
           </a>

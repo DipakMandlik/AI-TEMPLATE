@@ -25,6 +25,7 @@
   "devDependencies": {
     "@ai-template/config": "workspace:*",
     "@ai-template/validation": "workspace:*",
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.49.1",
     "@types/node": "^22.10.5",
     "concurrently": "^10.0.3",

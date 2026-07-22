@@ -2,7 +2,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypePrettyCode from "rehype-pretty-code";
 import rehypeSlug from "rehype-slug";
 import { defineCollection, defineConfig, s } from "velite";
-import { PROVIDERS } from "@ai-template/validation";
+import { parseTemplatePathSegments } from "./src/paths.js";
 import { validateTemplateFrontmatter } from "./src/schema.js";
 
 const templates = defineCollection({
@@ -39,17 +39,11 @@ const templates = defineCollection({
     })
     .transform((data) => {
       // `templatePath` is relative to the content root, so it's prefixed
-      // with the collection's own "templates/" pattern segment.
-      const [, provider, category, slug] = data.templatePath.split("/");
+      // with the collection's own "templates/" pattern segment — the leading
+      // element of the split is that "templates" segment itself, discarded.
+      const [, ...pathSegments] = data.templatePath.split("/");
       const contextPath = `${data.templatePath}.mdx`;
-      if (!provider || !category || !slug) {
-        throw new Error(`${contextPath} must live at templates/{provider}/{category}/{slug}.mdx`);
-      }
-      if (!(PROVIDERS as readonly string[]).includes(provider)) {
-        throw new Error(
-          `${contextPath}: "${provider}" is not a known provider directory (${PROVIDERS.join(", ")})`,
-        );
-      }
+      const { provider, category, slug } = parseTemplatePathSegments(pathSegments, contextPath);
       // Re-validates every frontmatter field against packages/validation's
       // templateMetaSchema — the single, shared source of truth for what a
       // valid template looks like (see docs/adr/0002-content-pipeline.md).
@@ -97,7 +91,7 @@ export default defineConfig({
   mdx: {
     rehypePlugins: [
       rehypeSlug,
-      [rehypePrettyCode, { theme: "github-light" }],
+      [rehypePrettyCode, { theme: "github-light-high-contrast" }],
       rehypeAutolinkHeadings,
     ],
   },

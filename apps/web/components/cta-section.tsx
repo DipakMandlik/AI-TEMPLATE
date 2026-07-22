@@ -8,7 +8,7 @@ export function CtaSection() {
         <h2 className="text-3xl font-semibold tracking-tight text-white">
           Ready to build with production-grade AI templates?
         </h2>
-        <p className="max-w-xl text-white/80">
+        <p className="max-w-xl text-white/90">
           Browse the catalog, copy a prompt, and ship — or contribute a template for the tool you
           use every day.
         </p>
