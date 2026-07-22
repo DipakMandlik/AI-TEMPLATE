@@ -26,7 +26,11 @@ export async function generateMetadata({
   const { slug } = await params;
   const doc = docs.find((d) => d.slug === slug);
   if (!doc) return {};
-  return { title: doc.title, description: doc.description };
+  return {
+    title: doc.title,
+    description: doc.description,
+    alternates: { canonical: `/docs/${slug}` },
+  };
 }
 
 export default async function DocPage({ params }: { params: Promise<PageParams> }) {

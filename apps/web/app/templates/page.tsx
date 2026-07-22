@@ -8,6 +8,10 @@ import { TemplatesExplorer } from "../../features/templates/templates-explorer";
 export const metadata: Metadata = {
   title: "Templates",
   description: "Browse production-ready AI prompt and agent templates across every major tool.",
+  // Every filter/search combination lives at this same path via query
+  // params — canonicalize to the bare URL so they aren't indexed as
+  // separate pages.
+  alternates: { canonical: "/templates" },
 };
 
 function ExplorerSkeleton() {

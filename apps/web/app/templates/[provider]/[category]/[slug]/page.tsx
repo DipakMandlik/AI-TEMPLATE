@@ -11,6 +11,7 @@ import { DownloadButton } from "../../../../../features/templates/download-butto
 import { relatedTemplates } from "../../../../../features/templates/related";
 import { TemplateCard } from "../../../../../features/templates/template-card";
 import { templateGithubUrl } from "../../../../../lib/github";
+import { SITE_URL } from "../../../../../lib/site";
 
 interface PageParams {
   provider: string;
@@ -35,10 +36,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const template = findTemplate(await params);
   if (!template) return {};
+  const path = `/templates/${template.provider}/${template.category}/${template.slug}`;
   return {
     title: template.title,
     description: template.description,
-    openGraph: { title: template.title, description: template.description },
+    alternates: { canonical: path },
+    openGraph: {
+      type: "article",
+      title: template.title,
+      description: template.description,
+      publishedTime: template.createdAt,
+      modifiedTime: template.updatedAt,
+      tags: template.tags,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: template.title,
+      description: template.description,
+    },
   };
 }
 
@@ -47,9 +62,48 @@ export default async function TemplateDetailPage({ params }: { params: Promise<P
   if (!template) notFound();
 
   const related = relatedTemplates(templates, template);
+  const path = `/templates/${template.provider}/${template.category}/${template.slug}`;
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Templates", item: `${SITE_URL}/templates` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: template.category,
+        item: `${SITE_URL}/templates?category=${template.category}`,
+      },
+      { "@type": "ListItem", position: 3, name: template.title, item: `${SITE_URL}${path}` },
+    ],
+  };
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: template.title,
+    description: template.description,
+    datePublished: template.createdAt,
+    dateModified: template.updatedAt,
+    keywords: template.tags.join(", "),
+    author: { "@type": "Person", name: template.author.name },
+    license: template.license,
+    url: `${SITE_URL}${path}`,
+  };
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-6 py-16">
+      <script
+        type="application/ld+json"
+        // Built entirely from this template's own frontmatter/build-time
+        // data — no user input reaches this serialization.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <Link href="/templates" className="text-sm text-[var(--color-muted)] hover:underline">
         ← All templates
       </Link>

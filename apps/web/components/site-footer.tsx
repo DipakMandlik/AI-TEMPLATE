@@ -7,6 +7,7 @@ const FOOTER_LINKS = [
       { label: "Templates", href: "/templates" },
       { label: "Categories", href: "/categories" },
       { label: "Docs", href: "/docs" },
+      { label: "RSS Feed", href: "/feed.xml" },
     ],
   },
   {

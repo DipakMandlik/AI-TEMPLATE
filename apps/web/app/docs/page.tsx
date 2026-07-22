@@ -7,6 +7,7 @@ import { DocsNav } from "../../features/docs/docs-nav";
 export const metadata: Metadata = {
   title: "Docs",
   description: "Getting started, architecture, and contribution guides for AI-TEMPLATE.",
+  alternates: { canonical: "/docs" },
 };
 
 export default function DocsIndexPage() {

@@ -7,6 +7,7 @@ import { buildFacets } from "../../features/templates/facets";
 export const metadata: Metadata = {
   title: "Categories",
   description: "Browse the template library by category — frontend, backend, security, and more.",
+  alternates: { canonical: "/categories" },
 };
 
 function toTitleCase(slug: string) {

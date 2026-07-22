@@ -47,6 +47,14 @@ This is a standard Next.js app inside a pnpm monorepo, which Vercel supports nat
 
 No environment variables are required for the core product to run.
 
+## Optional: NEXT_PUBLIC_SITE_URL
+
+Set this to your real production origin (e.g. `https://your-domain.com`) so the sitemap, RSS
+feed, canonical URLs, and generated OpenGraph images resolve to absolute URLs that match where
+the site is actually deployed, instead of the `https://ai-template.dev` placeholder in
+`apps/web/lib/site.ts`. Nothing breaks without it — search engines and social crawlers just see
+the placeholder domain in metadata until it's set.
+
 ## What's not wired up yet
 
 Analytics, authentication, and community features are reserved interfaces
