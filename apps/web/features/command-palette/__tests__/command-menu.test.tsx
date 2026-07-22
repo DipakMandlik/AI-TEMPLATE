@@ -25,7 +25,9 @@ describe("CommandMenu", () => {
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /search/i }));
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    // The palette is dynamically imported on first open, so it may not be
+    // in the DOM synchronously after the click.
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText(/search templates, categories, and pages/i),
     ).toBeInTheDocument();
@@ -35,6 +37,7 @@ describe("CommandMenu", () => {
     const user = userEvent.setup();
     renderMenu();
     await user.click(screen.getByRole("button", { name: /search/i }));
+    await screen.findByRole("dialog");
 
     expect(screen.getByText("Navigate")).toBeInTheDocument();
     expect(screen.getByRole("option", { name: /templates/i })).toBeInTheDocument();
@@ -46,6 +49,7 @@ describe("CommandMenu", () => {
     const user = userEvent.setup();
     renderMenu();
     await user.click(screen.getByRole("button", { name: /search/i }));
+    await screen.findByRole("dialog");
 
     await user.click(screen.getByRole("option", { name: /templates/i }));
     expect(push).toHaveBeenCalledWith("/templates");
@@ -56,6 +60,7 @@ describe("CommandMenu", () => {
     const user = userEvent.setup();
     renderMenu();
     await user.click(screen.getByRole("button", { name: /search/i }));
+    await screen.findByRole("dialog");
 
     await user.type(
       screen.getByPlaceholderText(/search templates, categories, and pages/i),

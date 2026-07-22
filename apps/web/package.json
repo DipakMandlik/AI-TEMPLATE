@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "pnpm --filter @ai-template/content run build && concurrently -k -n content,next \"pnpm --filter @ai-template/content exec velite dev\" \"next dev\"",
     "build": "pnpm --filter @ai-template/content run build && next build",
+    "analyze": "pnpm --filter @ai-template/content run build && next experimental-analyze",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "pnpm --filter @ai-template/content run build && tsc --noEmit",
