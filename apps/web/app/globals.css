@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "@ai-template/config/theme.css";
 
+/* Tailwind's automatic content detection only walks apps/web's own tree;
+   packages/ui is a sibling workspace package, so its class usage must be
+   scanned explicitly or its utilities never get generated. */
+@source "../../../packages/ui/src";
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
