@@ -82,9 +82,8 @@ ai-template/
 │   └── validation/                 # Zod schemas shared by content, forms, and API routes
 ├── content/
 │   └── templates/
-│       └── {provider-or-generic}/{category}/{template-slug}/
-│           ├── template.mdx        # Body: description, examples, best practices, prompt
-│           └── meta.json           # Structured metadata (validated against schema)
+│       └── {provider-or-generic}/{category}/{template-slug}.mdx
+│                                   # YAML frontmatter (validated against schema) + MDX body
 ├── docs/                           # Docusaurus-free, MDX-based docs rendered by apps/web
 ├── .github/
 │   ├── workflows/                  # ci.yml, lighthouse.yml, codeql.yml, release.yml, preview.yml
@@ -107,22 +106,19 @@ in all of Next.js.
 
 ### 4.1 Authoring format
 
-Each template is a directory, not a single file — this scales better than the inspiration
-project's flat `{type}/{category}/{name}.md` once a template needs multiple examples, images,
-or a changelog:
+Each template is a **single MDX file** with YAML frontmatter — see `docs/adr/0002-content-pipeline.md`'s
+amendment for why the original two-file (`meta.json` + `template.mdx`) design was dropped:
+frontmatter is validated and typed before the MDX body is ever parsed, so splitting metadata
+into a second file bought nothing.
 
 ```
-content/templates/cursor/frontend/react-server-components/
-├── template.mdx
-├── meta.json
-└── CHANGELOG.md
+content/templates/cursor/frontend/react-server-components.mdx
 ```
 
-`meta.json` (validated by `packages/validation/template.schema.ts`, a Zod schema):
+Frontmatter shape (validated by `packages/validation/src/template.ts`, a Zod schema):
 
 ```ts
-export const TemplateMeta = z.object({
-  slug: z.string().regex(/^[a-z0-9-]+$/),
+export const TemplateMetaSchema = z.object({
   title: z.string().min(3).max(80),
   description: z.string().min(20).max(240),
   author: z.object({
@@ -130,63 +126,51 @@ export const TemplateMeta = z.object({
     url: z.string().url().optional(),
     github: z.string().optional(),
   }),
-  version: z.string().regex(/^\d+\.\d+\.\d+$/),
-  compatibility: z
-    .array(
-      z.enum([
-        "claude-code",
-        "cursor",
-        "openai",
-        "gemini",
-        "copilot",
-        "windsurf",
-        "codex",
-        "aider",
-        "cline",
-        "roo-code",
-        "continue-dev",
-        "custom",
-      ]),
-    )
-    .min(1),
-  tags: z.array(z.string()).max(12),
-  category: z.string(),
+  version: z.string().regex(semverPattern),
+  compatibility: z.array(ProviderSchema).min(1),
+  tags: z.array(z.string()).min(1).max(12),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]),
   license: z.string(), // SPDX identifier
-  useCases: z.array(z.string()),
+  useCases: z.array(z.string()).min(1),
   bestPractices: z.array(z.string()).optional(),
   limitations: z.array(z.string()).optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  examples: z.array(z.object({ title: z.string(), input: z.string(), output: z.string() })).min(1),
+  changelog: z
+    .array(z.object({ version: z.string(), date: z.string(), changes: z.array(z.string()).min(1) }))
+    .min(1),
+  createdAt: z.string(), // YYYY-MM-DD
+  updatedAt: z.string(),
 });
 ```
 
-`template.mdx` frontmatter is intentionally thin (title + description for the MDX renderer);
-all structured metadata lives in `meta.json` so it can be validated, indexed, and queried
-without parsing MDX ASTs.
+The template's `slug`, primary `provider`, and `category` are derived from the file's own path
+(`{provider}/{category}/{slug}.mdx`) rather than repeated in frontmatter — one less place for
+the two to drift apart. `compatibility` is the full list of tools the template actually works
+with, which may be broader than its one primary `provider` grouping. The MDX body is the
+long-form overview and the actual prompt/rule content, rendered with syntax highlighting.
 
 ### 4.2 Build-time pipeline
 
-1. **Content Collections (Velite)** walks `content/templates/**`, parses `meta.json` +
-   `template.mdx`, validates every entry against `TemplateMeta`, and fails the build on any
-   violation — with the offending file path and the exact Zod error, not a silent skip.
-2. Output is a typed `.content-collections/` cache: `templates: Template[]`, fully typed,
-   imported directly (`import { templates } from "content-collections"`) — no runtime JSON
-   fetch, no hydration mismatch risk.
+1. **Velite** walks `content/templates/**/*.mdx`, parses frontmatter, validates every entry
+   against `TemplateMetaSchema`, and fails the build on any violation — with the offending file
+   path and the exact Zod error, not a silent skip.
+2. Output is a typed, generated module (`#content`): `templates: Template[]`, fully typed,
+   imported directly — no runtime JSON fetch, no hydration mismatch risk.
 3. A generated **search index** (FlexSearch, tokenized on title/description/tags/category)
    is built once at build time and served as a static asset chunked by provider — mirroring
    the inspiration project's "split payload" idea, but generated by the same TS pipeline
-   instead of a separate Python script.
+   instead of a separate Python script. (Lands in Phase 6.)
 4. Categories, providers, and difficulty facets are **derived from content**, not hand-maintained
    lists — adding a template with a new tag automatically surfaces it in the filter sidebar.
 5. `scripts/validate-content.ts` runs the same validation standalone in CI (`pnpm validate:content`)
-   so a PR that only touches `content/` still gets a fast, isolated check.
+   so a PR that only touches `content/` still gets a fast, isolated check, without a full
+   Next.js build.
 
 ### 4.3 Authoring workflow
 
 `pnpm new:template` runs an interactive TS script (`scripts/new-template.ts`) that scaffolds
-the directory, pre-fills `meta.json` from prompts, and opens the MDX file — removing the
-copy-paste-and-edit-and-hope-it-validates friction.
+the file at the right path, pre-fills frontmatter from prompts, and leaves the MDX body ready
+to write — removing the copy-paste-and-edit-and-hope-it-validates friction.
 
 ## 5. Rendering & data flow
 
