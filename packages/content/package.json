@@ -2,19 +2,29 @@
   "name": "@ai-template/content",
   "version": "0.0.0",
   "private": true,
-  "description": "Content Collections pipeline for AI-TEMPLATE templates. The Velite integration and TemplateMeta validation land in Phase 5.",
+  "description": "Content Collections pipeline for AI-TEMPLATE templates.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "build": "pnpm --filter @ai-template/validation run build && velite build --clean",
+    "dev": "pnpm --filter @ai-template/validation run build && velite dev",
+    "typecheck": "pnpm run build && tsc --noEmit",
+    "test": "pnpm run build && vitest run"
   },
   "devDependencies": {
     "@ai-template/config": "workspace:*",
     "@types/node": "^22.10.5",
     "typescript": "^5.9.3",
     "vitest": "^3.0.5"
+  },
+  "dependencies": {
+    "@ai-template/validation": "workspace:*",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-pretty-code": "^0.14.4",
+    "rehype-slug": "^6.0.0",
+    "shiki": "^4.3.1",
+    "velite": "^0.4.0"
   }
 }
