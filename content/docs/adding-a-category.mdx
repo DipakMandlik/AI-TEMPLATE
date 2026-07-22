@@ -1,0 +1,33 @@
+---
+title: Adding a Category
+description: Categories are derived from content, not a hand-maintained list — here's what that means in practice.
+order: 4
+---
+
+## There's no category registry to edit
+
+Categories come from the directory a template's file lives in
+(`content/templates/{provider}/{category}/{slug}.mdx`) — there is no separate list of
+"allowed categories" to update. Put a template under a new category directory, and:
+
+- It shows up as a new facet in the `/templates` sidebar automatically
+  (`apps/web/features/templates/facets.ts` derives every facet from the actual content).
+- The count next to every facet value updates to match.
+
+## Adding a genuinely new category
+
+1. Pick a short, kebab-case name (`frontend`, `security`, `data-engineering`). Check
+   `/templates` first to make sure it doesn't already exist under a slightly different name —
+   two categories that mean the same thing fragment the facet list for no reason.
+2. Create your template at `content/templates/{provider}/{new-category}/{slug}.mdx` (see
+   [Writing a Template](/docs/writing-a-template)).
+3. Run `pnpm validate:content` and `pnpm dev`, then confirm the new category appears in the
+   sidebar with the count you expect.
+
+That's the whole process — no code changes required for the category itself.
+
+## When you _would_ need a code change
+
+If a category needs special handling beyond "another facet value" — a dedicated landing page,
+a custom icon, category-specific copy — that's a real feature, not just adding a category, and
+belongs in its own PR with the reasoning explained.

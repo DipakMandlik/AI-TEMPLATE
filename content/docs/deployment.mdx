@@ -1,0 +1,55 @@
+---
+title: Deployment
+description: Self-hosting with plain Node.js, or deploying to Vercel — both from the same production build.
+order: 8
+---
+
+## Production build
+
+```md
+pnpm build
+```
+
+This runs `packages/content`'s build (which in turn builds `packages/validation` first) and
+then `next build` in `apps/web`. Every template page is statically generated at build time
+(`generateStaticParams` in `apps/web/app/templates/[provider]/[category]/[slug]/page.tsx`) —
+there's no database or API call at request time for template content.
+
+## Self-hosting with Node.js
+
+```md
+pnpm build
+pnpm --filter web start
+```
+
+`pnpm --filter web start` runs `next start`, serving the build from `apps/web/.next`. Put a
+reverse proxy (nginx, Caddy) in front of it for TLS in production; no other runtime
+dependency is required — no database, no external API keys, no accounts to provision (see
+architecture.md §1's zero-SaaS-core constraint).
+
+## Deploying to Vercel
+
+This is a standard Next.js app inside a pnpm monorepo, which Vercel supports natively:
+
+1. Import the repository in Vercel.
+2. Set the **Root Directory** to `apps/web`.
+3. Vercel auto-detects the framework (Next.js) and package manager (pnpm) from the lockfile.
+4. Override the **Build Command** to make sure the content pipeline runs first:
+
+   ```md
+   cd ../.. && pnpm --filter @ai-template/content run build && cd apps/web && pnpm exec next build
+   ```
+
+   (Or simpler: set the build command to `pnpm run build` at the **repo root**, with the
+   Vercel project's Root Directory left at the repository root and Output Directory set to
+   `apps/web/.next` — either approach works; the key requirement is that
+   `@ai-template/content`'s build step runs before `next build`.)
+
+No environment variables are required for the core product to run.
+
+## What's not wired up yet
+
+Analytics, authentication, and community features are reserved interfaces
+(`AuthProvider`, `AnalyticsSink` in architecture.md §7), not implemented — there is nothing to
+configure for them because they don't exist yet. When they land, this page will document the
+environment variables they add; until then, a deploy needs zero secrets.

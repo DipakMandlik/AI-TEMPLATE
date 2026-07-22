@@ -1,0 +1,78 @@
+---
+title: Package APIs
+description: The exported surface of each internal workspace package — what a contributor building a new feature actually has available to import.
+order: 7
+---
+
+There's no public HTTP API yet (route handlers for sitemap/RSS/health are planned — see
+`implementation-phases.md` Phase 9). This page documents the internal package exports
+contributors use when building features inside `apps/web`.
+
+## `@ai-template/content`
+
+```md
+import { templates, docs } from "@ai-template/content";
+import type { Template, Doc } from "@ai-template/content";
+```
+
+- `templates: Template[]` — every template, fully validated and typed, including the compiled
+  MDX (`code`), the raw source (`raw`), and every frontmatter field.
+- `docs: Doc[]` — every docs page (this one included), same shape idea: `slug`, `title`,
+  `description`, `order`, `code`.
+
+Both are static, build-time data — importing them adds no network request and no runtime
+parsing cost. This package's export is deliberately client-safe: it contains no Node-only
+code, so it's fine to import from a Client Component (see the amendment note in
+`docs/adr/0002-content-pipeline.md`'s related bug writeup, or just: don't add anything to
+`packages/content/src/index.ts` that uses `node:fs`/`node:url`/etc.).
+
+## `@ai-template/validation`
+
+```md
+import {
+templateMetaSchema, type TemplateMeta,
+providerSchema, PROVIDERS, PROVIDER_LABELS, type Provider,
+difficultySchema, DIFFICULTIES, type Difficulty,
+slugSchema, type Slug,
+parseOrThrow,
+} from "@ai-template/validation";
+```
+
+- `templateMetaSchema` — the Zod schema every template's frontmatter is validated against
+  (used by both the Velite transform and `scripts/validate-content.ts`).
+- `PROVIDERS` / `PROVIDER_LABELS` — the closed list of supported providers and their display
+  labels (see [Adding a Provider](/docs/adding-a-provider)).
+- `parseOrThrow(schema, data, context)` — parses `data` against `schema`, throwing an error
+  that lists every issue with its path if it fails; used anywhere a bare Zod stack trace
+  wouldn't be actionable enough.
+
+## `@ai-template/ui`
+
+```md
+import {
+Button, Badge, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter,
+Tooltip, TooltipProvider, TooltipTrigger, TooltipContent,
+Tabs, TabsList, TabsTrigger, TabsContent,
+Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle,
+Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem,
+Skeleton, ThemeProvider, ThemeToggle,
+cn, fadeIn, staggerContainer, staggerItem, pageTransition, springTransition, easeTransition,
+} from "@ai-template/ui";
+```
+
+Every component is documented visually at `/dev/components` in development
+(`pnpm dev`, not built in production). `cn()` merges class names and resolves conflicting
+Tailwind utilities; the motion exports are shared Framer Motion variants/transitions so
+animation timing stays consistent across the app instead of being redefined per component.
+
+## App-internal features (not published, but reused across routes)
+
+- `apps/web/features/search` — `searchTemplates(query)`, the FlexSearch wrapper.
+- `apps/web/features/templates/filters.ts` — `applyFilters(filters)`, the pure search + facet
+  - sort pipeline behind `/templates`.
+- `apps/web/features/templates/saved-filters.ts` — `loadSavedFilters()`, `saveFilter()`,
+  `deleteSavedFilter()`, the localStorage-backed filter presets.
+
+These aren't exported from a package (they're specific to `apps/web`), but they're the
+functions to reach for before writing a new filtering/search utility from scratch.

@@ -1,0 +1,102 @@
+---
+title: Writing a Template
+description: How to add a new template — the file layout, every frontmatter field, and how to validate and preview it before opening a PR.
+order: 3
+---
+
+## Scaffold the file
+
+```md
+pnpm new:template
+```
+
+This asks for a provider, category, slug, title, description, and author name, then creates
+a starting file at `content/templates/{provider}/{category}/{slug}.mdx` with valid
+placeholder frontmatter and a `TODO`-marked body — fill in every `TODO` and you're done with
+the mechanical part.
+
+You can also create the file by hand at that same path if you prefer.
+
+## File layout
+
+```md
+content/templates/{provider}/{category}/{slug}.mdx
+```
+
+- `{provider}` must be one of the supported providers (see below) — it becomes the template's
+  primary grouping.
+- `{category}` is a free-form kebab-case string (`frontend`, `backend`, `security`, `testing`,
+  `devops`, `documentation`, `data`, or a new one — see
+  [Adding a Category](/docs/adding-a-category)).
+- `{slug}` is the template's kebab-case identifier, unique within its category.
+
+The provider, category, and slug come **from the file path** — they are not repeated in
+frontmatter, so there's exactly one place that can drift.
+
+## Frontmatter reference
+
+Every field below is validated by `templateMetaSchema` in `packages/validation/src/template.ts`.
+An invalid template fails both `pnpm validate:content` and the build with the exact field and
+reason.
+
+| Field           | Type                                       | Required  | Notes                                        |
+| --------------- | ------------------------------------------ | --------- | -------------------------------------------- |
+| `title`         | string, 3–80 chars                         | yes       |                                              |
+| `description`   | string, 20–240 chars                       | yes       | Shown on the template card and detail page   |
+| `author.name`   | string                                     | yes       |                                              |
+| `author.url`    | URL                                        | no        |                                              |
+| `author.github` | string                                     | no        | GitHub username                              |
+| `version`       | semver (`1.0.0`)                           | yes       | Bump on every meaningful change              |
+| `compatibility` | array of providers                         | yes, ≥1   | See supported providers below                |
+| `tags`          | array of strings                           | yes, 1–12 | Powers search and the category facet         |
+| `difficulty`    | `beginner` \| `intermediate` \| `advanced` | yes       |                                              |
+| `license`       | SPDX identifier (e.g. `MIT`)               | yes       |                                              |
+| `useCases`      | array of strings                           | yes, ≥1   |                                              |
+| `bestPractices` | array of strings                           | no        |                                              |
+| `limitations`   | array of strings                           | no        | Be honest — what this template can't do      |
+| `examples`      | array of `{ title, input, output }`        | yes, ≥1   | Real input/output, not placeholder text      |
+| `changelog`     | array of `{ version, date, changes[] }`    | yes, ≥1   | `date` is `YYYY-MM-DD`                       |
+| `createdAt`     | `YYYY-MM-DD`                               | yes       |                                              |
+| `updatedAt`     | `YYYY-MM-DD`                               | yes       | Update this whenever you change the template |
+
+### Supported providers
+
+`claude-code`, `cursor`, `openai`, `gemini`, `copilot`, `windsurf`, `codex`, `aider`, `cline`,
+`roo-code`, `continue-dev`, `custom`.
+
+`custom` is for a template that isn't tied to one specific tool (a provider-agnostic prompt
+usable with any chat-based agent).
+
+## The body
+
+Everything after the frontmatter is the template's MDX body — free-form prose plus the actual
+prompt/rule content, typically under an `## Overview` and a `## The prompt` heading with the
+prompt in a fenced code block (fenced code blocks get syntax highlighting automatically).
+
+**Don't duplicate structured fields in the body.** `useCases`, `bestPractices`, `limitations`,
+`examples`, and the changelog are already rendered on the template page from frontmatter —
+repeating them as prose sections in the body just shows the same information twice.
+
+## Validate
+
+```md
+pnpm validate:content
+```
+
+Fast, standalone, no Next.js build required. Fails loudly with the file path and every
+validation issue if anything is wrong.
+
+## Preview
+
+```md
+pnpm dev
+```
+
+Your template appears at `/templates` and at
+`/templates/{provider}/{category}/{slug}`. Confirm every field you filled in actually renders
+the way you expect — the copy button, the examples, the version history.
+
+## Open the PR
+
+Once `pnpm validate:content`, `pnpm typecheck`, and `pnpm lint` all pass, open a PR. See
+[Contributing](/docs/contributing) for the PR checklist.

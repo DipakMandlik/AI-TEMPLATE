@@ -1,0 +1,56 @@
+---
+title: Architecture
+description: A public-facing summary of the stack and monorepo layout. The full design record lives in architecture.md at the repo root.
+order: 2
+---
+
+## Overview
+
+AI-TEMPLATE is a pnpm monorepo. The full technical design record — including the rationale
+for every major decision — lives in
+[`architecture.md`](https://github.com/DipakMandlik/AI-TEMPLATE/blob/main/architecture.md) at
+the repo root, alongside the [ADRs](https://github.com/DipakMandlik/AI-TEMPLATE/tree/main/docs/adr)
+that record when and why a decision changed. This page is the short version.
+
+## Stack
+
+- **Next.js 16** (App Router, Server Components by default)
+- **TypeScript**, strict mode everywhere
+- **Tailwind CSS v4** for styling, theme tokens as CSS variables
+- **shadcn/ui-based primitives**, owned in `packages/ui`, not installed as a black-box dependency
+- **Zod** for schema validation, shared between content, and (future) forms/API boundaries
+- **Velite** for the content pipeline — MDX + YAML frontmatter, compiled at build time
+- **FlexSearch** for client-side template search — no search SaaS, no network round-trip
+- **nuqs** for URL-synced filter state
+- **Vitest** (unit/component) and **Playwright** (e2e) for testing
+
+## Monorepo layout
+
+```md
+ai-template/
+├── apps/web/ The Next.js application
+├── packages/
+│ ├── ui/ Owned design-system primitives
+│ ├── content/ Velite content pipeline
+│ ├── validation/ Shared Zod schemas
+│ └── config/ Shared TypeScript config + Tailwind theme tokens
+├── content/
+│ ├── templates/ The template catalog (see Writing a Template)
+│ └── docs/ This documentation, in the same MDX pipeline
+├── scripts/ validate-content.ts, new-template.ts
+└── tests/e2e/ Playwright specs
+```
+
+## The core constraint: zero-SaaS core
+
+Browsing, searching, and reading templates works with `pnpm install && pnpm dev` — no
+external account required. Auth, analytics, and community features are additive interfaces
+reserved for later, not hard dependencies today. This is the single constraint every other
+architectural decision here is checked against.
+
+## Content pipeline, briefly
+
+Each template is one `.mdx` file with YAML frontmatter, validated against a shared Zod schema
+(`packages/validation`) both at build time (Velite) and standalone (`pnpm validate:content`).
+See [Writing a Template](/docs/writing-a-template) for the authoring side, and
+`docs/adr/0002-content-pipeline.md` for why it's one file, not two.

@@ -1,0 +1,58 @@
+---
+title: Getting Started
+description: Clone the repo and get AI-TEMPLATE running locally in under five minutes.
+order: 1
+---
+
+## Requirements
+
+- **Node.js 20.9+**
+- **pnpm 9+** (this repo uses pnpm workspaces — npm/yarn are not supported)
+
+## Clone and install
+
+```md
+git clone https://github.com/DipakMandlik/AI-TEMPLATE.git
+cd AI-TEMPLATE
+pnpm install
+```
+
+`pnpm install` links every workspace package (`apps/web`, `packages/ui`, `packages/content`,
+`packages/validation`, `packages/config`) — no separate setup step needed.
+
+## Run the app
+
+```md
+pnpm dev
+```
+
+This does two things before starting the dev server:
+
+1. Builds the content pipeline (`packages/content`) once, so `apps/web` has real template
+   data to render on the very first request.
+2. Starts `next dev` alongside a Velite watcher, so editing a file under `content/` picks up
+   automatically without restarting.
+
+Open [http://localhost:3000](http://localhost:3000). You should see the landing page, and
+[http://localhost:3000/templates](http://localhost:3000/templates) should list every template
+under `content/templates/`.
+
+## Everyday commands
+
+| Command                 | What it does                                                        |
+| ----------------------- | ------------------------------------------------------------------- |
+| `pnpm dev`              | Start the dev server                                                |
+| `pnpm build`            | Production build (content pipeline, then `next build`)              |
+| `pnpm test`             | Unit + component tests (Vitest) across every package                |
+| `pnpm test:e2e`         | End-to-end tests (Playwright)                                       |
+| `pnpm lint`             | ESLint                                                              |
+| `pnpm typecheck`        | `tsc --noEmit` across every package                                 |
+| `pnpm format`           | Prettier, writes changes                                            |
+| `pnpm validate:content` | Validates every template's frontmatter, independent of a full build |
+| `pnpm new:template`     | Interactive scaffolding for a new template                          |
+
+## Next steps
+
+- Adding a template? Start with [Writing a Template](/docs/writing-a-template).
+- Want the full technical picture? See [Architecture](/docs/architecture).
+- Ready to open a PR? See [Contributing](/docs/contributing).

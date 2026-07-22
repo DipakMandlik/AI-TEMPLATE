@@ -58,6 +58,33 @@ const templates = defineCollection({
     }),
 });
 
+const docs = defineCollection({
+  name: "Doc",
+  pattern: "docs/**/*.mdx",
+  schema: s
+    .object({
+      docPath: s.path(),
+      code: s.mdx(),
+      title: s.string(),
+      description: s.string(),
+      // Nav order within the docs sidebar; lower sorts first.
+      order: s.number().default(0),
+    })
+    .transform((data) => {
+      const [, slug] = data.docPath.split("/");
+      if (!slug) {
+        throw new Error(`${data.docPath}.mdx must live directly under docs/{slug}.mdx`);
+      }
+      return {
+        slug,
+        title: data.title,
+        description: data.description,
+        order: data.order,
+        code: data.code,
+      };
+    }),
+});
+
 export default defineConfig({
   root: "../../content",
   output: {
@@ -66,7 +93,7 @@ export default defineConfig({
     base: "/static/",
     clean: true,
   },
-  collections: { templates },
+  collections: { templates, docs },
   mdx: {
     rehypePlugins: [
       rehypeSlug,

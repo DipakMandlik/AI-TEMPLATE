@@ -1,0 +1,54 @@
+---
+title: Adding a Provider
+description: Unlike categories, providers are a fixed enum — here's the (small) code change to add a new one.
+order: 5
+---
+
+## Why providers are different from categories
+
+[Categories](/docs/adding-a-category) are free-form strings derived from the file path.
+**Providers are a closed, validated enum** — `PROVIDERS` in
+`packages/validation/src/provider.ts` — because compatibility badges, the command palette, and
+the facet sidebar all need a known, finite list to render consistent labels for (see
+`roadmap.md` §3.2 #7 for why every provider is modeled as an equal citizen, not a
+Claude-specific afterthought).
+
+## Steps
+
+1. **Add the provider to the enum**, in `packages/validation/src/provider.ts`:
+
+   ```md
+   export const PROVIDERS = [
+   "claude-code",
+   "cursor",
+   // ...
+   "your-new-provider",
+   ] as const;
+   ```
+
+2. **Add its display label** in the same file's `PROVIDER_LABELS` map:
+
+   ```md
+   export const PROVIDER_LABELS: Record<Provider, string> = {
+   // ...
+   "your-new-provider": "Your New Provider",
+   };
+   ```
+
+3. **Rebuild the package**: `pnpm --filter @ai-template/validation run build` (or just run
+   `pnpm dev`/`pnpm build` from the root — both rebuild it automatically as a prerequisite
+   step).
+
+4. **Add at least one template** using the new provider, either as its primary grouping
+   directory (`content/templates/your-new-provider/{category}/{slug}.mdx`) or listed in an
+   existing template's `compatibility` array. A provider with zero templates is dead code.
+
+5. Run `pnpm validate:content`, `pnpm typecheck`, and `pnpm test` — the schema tests in
+   `packages/validation/tests/template.test.ts` exercise the full `PROVIDERS` list, so a typo
+   in the new entry surfaces immediately.
+
+## What you get for free
+
+Once the provider exists in the enum, everything else — the facet sidebar count, the
+compatibility badges on template cards and detail pages, the command palette's provider
+subtitle — picks it up automatically. There's no second list to keep in sync.
