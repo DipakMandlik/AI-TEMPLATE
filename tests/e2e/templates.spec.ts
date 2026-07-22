@@ -59,6 +59,24 @@ test("command palette searches real template content", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("comparing two templates side by side", async ({ page }) => {
+  await page.goto("/templates");
+
+  const cards = page.locator("main .grid > *");
+  await cards.nth(0).getByRole("button", { name: "Compare" }).click();
+  await cards.nth(1).getByRole("button", { name: "Compare" }).click();
+
+  const compareBar = page.getByRole("region", { name: "Template comparison" });
+  await expect(compareBar).toBeVisible();
+  const compareLink = compareBar.getByRole("link", { name: "Compare" });
+  await expect(compareLink).toBeEnabled();
+
+  await compareLink.click();
+  await expect(page.getByRole("heading", { level: 1, name: "Compare templates" })).toBeVisible();
+  // Two template columns, each with its own "The prompt" section.
+  await expect(page.getByRole("heading", { name: "The prompt" })).toHaveCount(2);
+});
+
 test("copy prompt button copies the raw template to the clipboard", async ({
   page,
   context,
