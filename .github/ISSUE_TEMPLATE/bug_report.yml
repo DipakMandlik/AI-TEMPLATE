@@ -1,0 +1,73 @@
+name: Bug report
+description: Something in the site, build, or a script is broken.
+title: "fix: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please search
+        [existing issues](https://github.com/DipakMandlik/AI-TEMPLATE/issues) first to avoid duplicates.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: When I run `pnpm dev` and open /templates, the facet sidebar...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `pnpm install && pnpm dev`
+        2. Go to /templates
+        3. Filter by provider "Cursor"
+        4. See error
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does this happen?
+      multiple: true
+      options:
+        - apps/web (Next.js site)
+        - packages/content (Velite pipeline)
+        - packages/validation (Zod schemas)
+        - packages/ui (design system)
+        - Content (a specific template or docs page)
+        - Scripts (validate-content, new-template)
+        - CI / GitHub Actions
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Node / pnpm version
+      description: Output of `node -v` and `pnpm -v`.
+      placeholder: node v20.11.0, pnpm 9.15.0
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / error output
+      description: Paste terminal output or browser console errors. This will be formatted as code automatically.
+      render: shell
+    validations:
+      required: false

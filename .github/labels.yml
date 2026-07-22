@@ -1,0 +1,79 @@
+# Declarative label set, synced to GitHub by .github/workflows/labels.yml
+# whenever this file changes on main. Edit here, not in the GitHub UI —
+# manual changes get overwritten on the next sync.
+
+- name: bug
+  color: "d73a4a"
+  description: Something isn't working as intended.
+
+- name: enhancement
+  color: "a2eeef"
+  description: A new feature or improvement to existing behavior.
+
+- name: content
+  color: "0e8a16"
+  description: A new or updated template/docs page.
+
+- name: new-template
+  color: "0e8a16"
+  description: Proposes a specific new template for the library.
+
+- name: provider
+  color: "1d76db"
+  description: Related to provider support (claude-code, cursor, openai, etc.).
+
+- name: documentation
+  color: "0075ca"
+  description: Improvements or additions to docs.
+
+- name: triage
+  color: "ededed"
+  description: Needs a maintainer to confirm and categorize.
+
+- name: good-first-issue
+  color: "7057ff"
+  description: Good for newcomers.
+
+- name: help-wanted
+  color: "008672"
+  description: Extra attention or a specific contributor is needed.
+
+- name: question
+  color: "d876e3"
+  description: Further information is requested.
+
+- name: duplicate
+  color: "cfd3d7"
+  description: This issue or pull request already exists.
+
+- name: invalid
+  color: "e4e669"
+  description: This doesn't seem right.
+
+- name: wontfix
+  color: "ffffff"
+  description: This will not be worked on.
+
+- name: breaking-change
+  color: "b60205"
+  description: Introduces a breaking change to the public API or content schema.
+
+- name: dependencies
+  color: "0366d6"
+  description: Pull requests that update a dependency file (e.g. Dependabot).
+
+- name: ci
+  color: "fbca04"
+  description: Continuous integration and GitHub Actions.
+
+- name: security
+  color: "b60205"
+  description: A security-relevant issue or fix.
+
+- name: performance
+  color: "c2e0c6"
+  description: Build size, Lighthouse score, or runtime performance.
+
+- name: accessibility
+  color: "5319e7"
+  description: Keyboard navigation, screen readers, or WCAG conformance.

@@ -1,0 +1,72 @@
+name: New template proposal
+description: Propose a new prompt/rule/agent template for the library.
+title: "content: add "
+labels: ["content", "new-template"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Most template additions don't need this issue — you can often go straight to a PR.
+        Use this when you want feedback on the idea first, or don't plan to implement it yourself.
+        See `/docs/writing-a-template` for the full frontmatter reference.
+
+  - type: input
+    id: title
+    attributes:
+      label: Template title
+      placeholder: "SQL Query Performance Reviewer"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider
+      options:
+        - claude-code
+        - cursor
+        - openai
+        - gemini
+        - copilot
+        - windsurf
+        - codex
+        - aider
+        - cline
+        - roo-code
+        - continue-dev
+        - custom
+    validations:
+      required: true
+
+  - type: input
+    id: category
+    attributes:
+      label: Category
+      description: A kebab-case category (frontend, backend, security, testing, devops, documentation, data, or propose a new one).
+      placeholder: backend
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What does this template do?
+      description: 20-240 characters, same constraint as the `description` frontmatter field.
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: Use cases
+      description: One per line — at least one required.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I plan to open the PR myself (following /docs/writing-a-template)
+          required: false

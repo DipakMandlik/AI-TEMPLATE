@@ -1,0 +1,43 @@
+name: New provider request
+description: Request support for an AI tool that isn't in the provider taxonomy yet.
+title: "feat(providers): add "
+labels: ["enhancement", "provider"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        See `/docs/adding-a-provider` for what adding a provider actually touches
+        (the `PROVIDERS` enum in `packages/validation/src/provider.ts`, its label,
+        and any provider-specific rendering).
+
+  - type: input
+    id: provider_name
+    attributes:
+      label: Provider name
+      placeholder: "Zed AI"
+    validations:
+      required: true
+
+  - type: input
+    id: provider_url
+    attributes:
+      label: Link to the tool
+      placeholder: "https://zed.dev"
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why does this provider need first-class support?
+      description: How many templates would realistically use it? What's distinct about its rule/prompt format compared to existing providers?
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I plan to open the PR myself, including at least one seed template for this provider
+          required: false
