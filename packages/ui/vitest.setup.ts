@@ -24,3 +24,14 @@ vi.stubGlobal(
     dispatchEvent: vi.fn(),
   })),
 );
+
+// jsdom doesn't implement ResizeObserver or scrollIntoView either; cmdk
+// (the Command primitive) uses both to manage keyboard-navigable scrolling.
+class MockResizeObserver implements ResizeObserver {
+  disconnect() {}
+  observe() {}
+  unobserve() {}
+}
+
+vi.stubGlobal("ResizeObserver", MockResizeObserver);
+Element.prototype.scrollIntoView = () => {};

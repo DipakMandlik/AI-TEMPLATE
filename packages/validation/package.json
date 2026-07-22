@@ -13,13 +13,14 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --out-dir dist --clean",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@ai-template/config": "workspace:*",
+    "@vitest/coverage-v8": "^3.2.7",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^3.0.5"

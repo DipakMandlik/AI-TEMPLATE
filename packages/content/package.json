@@ -11,11 +11,12 @@
     "build": "pnpm --filter @ai-template/validation run build && velite build --clean",
     "dev": "pnpm --filter @ai-template/validation run build && velite dev",
     "typecheck": "pnpm run build && tsc --noEmit",
-    "test": "pnpm run build && vitest run"
+    "test": "pnpm run build && vitest run --coverage"
   },
   "devDependencies": {
     "@ai-template/config": "workspace:*",
     "@types/node": "^22.10.5",
+    "@vitest/coverage-v8": "^3.2.7",
     "typescript": "^5.9.3",
     "vitest": "^3.0.5"
   },
