@@ -90,6 +90,10 @@ export function TemplatesExplorer() {
           onClear={() => setFilters({ provider: [], category: [], difficulty: [] })}
         />
         <div className="flex-1">
+          {/* Visually hidden, but real: without it, TemplateCard's <h3>
+              title follows the page's <h1> with nothing in between —
+              an invalid heading-order jump for screen reader navigation. */}
+          <h2 className="sr-only">Results</h2>
           <p className="mb-4 text-sm text-[var(--color-muted)]">
             {results.length} template{results.length === 1 ? "" : "s"}
           </p>

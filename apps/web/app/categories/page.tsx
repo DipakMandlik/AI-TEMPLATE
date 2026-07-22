@@ -31,6 +31,7 @@ export default function CategoriesPage() {
           straight to a filtered view of the library.
         </p>
       </div>
+      <h2 className="sr-only">Categories</h2>
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {categories.map((category) => (
           <Link

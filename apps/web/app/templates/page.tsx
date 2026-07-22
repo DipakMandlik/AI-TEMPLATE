@@ -14,12 +14,18 @@ export const metadata: Metadata = {
   alternates: { canonical: "/templates" },
 };
 
-function ExplorerSkeleton() {
+/**
+ * Sized to the real template count (not a fixed placeholder count) so the
+ * skeleton's height closely matches the real grid once TemplatesExplorer
+ * hydrates — a mismatch here was measurably causing layout shift (CLS) as
+ * the footer jumped when the real, taller grid replaced a shorter skeleton.
+ */
+function ExplorerSkeleton({ resultCount }: { resultCount: number }) {
   return (
     <div className="flex flex-col gap-8 lg:flex-row">
       <Skeleton className="h-96 w-full lg:w-64 lg:shrink-0" />
       <div className="grid flex-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }, (_, i) => (
+        {Array.from({ length: resultCount }, (_, i) => (
           <Skeleton key={i} className="h-56 w-full" />
         ))}
       </div>
@@ -41,7 +47,7 @@ export default function TemplatesPage() {
           and {facets.categories.length} categories.
         </p>
       </div>
-      <Suspense fallback={<ExplorerSkeleton />}>
+      <Suspense fallback={<ExplorerSkeleton resultCount={templates.length} />}>
         <TemplatesExplorer />
       </Suspense>
     </main>

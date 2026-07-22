@@ -26,6 +26,7 @@ export default function DocsIndexPage() {
       <div className="flex flex-col gap-8 lg:flex-row">
         <DocsNav />
         <div className="grid flex-1 gap-6 sm:grid-cols-2">
+          <h2 className="sr-only">Guides</h2>
           {sorted.map((doc) => (
             <Link key={doc.slug} href={`/docs/${doc.slug}`} className="block">
               <Card className="h-full">
