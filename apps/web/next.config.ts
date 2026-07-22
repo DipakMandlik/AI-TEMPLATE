@@ -8,6 +8,19 @@ const nextConfig: NextConfig = {
   // The Playwright webServer (and some CI sandboxes) reach the dev server
   // via 127.0.0.1 rather than localhost.
   allowedDevOrigins: ["127.0.0.1"],
+  async headers() {
+    return [
+      {
+        // /compare is server-rendered per-request (it reads searchParams),
+        // so Next gives it Next's default no-store — but its output is a
+        // pure function of the query string against build-time-fixed
+        // template data, exactly as cacheable as the statically generated
+        // pages, which all get s-maxage=31536000 automatically.
+        source: "/compare",
+        headers: [{ key: "Cache-Control", value: "public, s-maxage=31536000" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
