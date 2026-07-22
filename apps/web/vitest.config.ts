@@ -14,10 +14,19 @@ export default defineConfig({
       include: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "features/**/*.{ts,tsx}"],
       exclude: [
         "**/__tests__/**",
-        // Next.js route/layout Server Components — exercised by Playwright
-        // e2e (tests/e2e/**), not unit-testable the way plain components are.
+        // Next.js route/layout Server Components and metadata-route
+        // conventions (sitemap, robots, RSS, OG/Twitter/favicon images) —
+        // exercised by Playwright e2e and manual verification against a
+        // real build, not unit-testable the way plain components are.
         "app/**/page.tsx",
         "app/**/layout.tsx",
+        "app/**/sitemap.ts",
+        "app/**/robots.ts",
+        "app/**/opengraph-image.tsx",
+        "app/**/twitter-image.tsx",
+        "app/icon.tsx",
+        "app/apple-icon.tsx",
+        "app/feed.xml/route.ts",
         // Thin MDX runtime + presentational shell components, exercised by
         // e2e on every real page (every route renders the header/footer;
         // every template/doc page renders MdxContent).
