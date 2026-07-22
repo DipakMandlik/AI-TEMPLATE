@@ -1,0 +1,40 @@
+{
+  "name": "ai-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The world's best AI Prompt & AI Agent Template Library.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.9.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm -r --if-present build",
+    "start": "pnpm --filter web start",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "prettier --write"
+    ],
+    "*.{json,md,mdx,css,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}
