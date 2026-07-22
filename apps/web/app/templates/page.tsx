@@ -1,13 +1,27 @@
 import { templates } from "@ai-template/content";
+import { Skeleton } from "@ai-template/ui";
 import type { Metadata } from "next";
-import { FacetSidebar } from "../../features/templates/facet-sidebar";
+import { Suspense } from "react";
 import { buildFacets } from "../../features/templates/facets";
-import { TemplateCard } from "../../features/templates/template-card";
+import { TemplatesExplorer } from "../../features/templates/templates-explorer";
 
 export const metadata: Metadata = {
   title: "Templates",
   description: "Browse production-ready AI prompt and agent templates across every major tool.",
 };
+
+function ExplorerSkeleton() {
+  return (
+    <div className="flex flex-col gap-8 lg:flex-row">
+      <Skeleton className="h-96 w-full lg:w-64 lg:shrink-0" />
+      <div className="grid flex-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }, (_, i) => (
+          <Skeleton key={i} className="h-56 w-full" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function TemplatesPage() {
   const facets = buildFacets(templates);
@@ -23,21 +37,9 @@ export default function TemplatesPage() {
           and {facets.categories.length} categories.
         </p>
       </div>
-      <div className="flex flex-col gap-8 lg:flex-row">
-        <FacetSidebar
-          providers={facets.providers}
-          categories={facets.categories}
-          difficulties={facets.difficulties}
-        />
-        <div className="grid flex-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {templates.map((template) => (
-            <TemplateCard
-              key={`${template.provider}/${template.category}/${template.slug}`}
-              template={template}
-            />
-          ))}
-        </div>
-      </div>
+      <Suspense fallback={<ExplorerSkeleton />}>
+        <TemplatesExplorer />
+      </Suspense>
     </main>
   );
 }
