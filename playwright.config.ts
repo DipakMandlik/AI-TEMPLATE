@@ -27,7 +27,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `pnpm --filter web exec next dev --port ${PORT}`,
+    command: `pnpm --filter @ai-template/content run build && pnpm --filter web exec next dev --port ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
