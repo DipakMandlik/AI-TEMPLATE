@@ -32,4 +32,4 @@ Use **Velite** for the Content Collections layer, with **Zod** schemas (shared f
   structured, independently-parseable metadata and per-template supporting files
   (`CHANGELOG.md`, images) without overloading one file.
 - `scripts/validate-content.ts` must be kept in sync with the Velite config so `pnpm
-  validate:content` can run standalone in CI without a full Next.js build.
+validate:content` can run standalone in CI without a full Next.js build.

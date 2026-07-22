@@ -36,24 +36,24 @@ Findings below are from direct inspection of the public repository (README, `CLA
   deployed to Cloudflare Pages, with a split-domain model: `www.aitmpl.com` (public browse)
   vs. `app.aitmpl.com` (authenticated via Clerk, for saved collections).
 - 29.8k GitHub stars, 3.19k forks, 209 open issues, MIT-licensed, created July 2025 — proof
-  the *idea* has strong demand, which raises the bar for what "better" needs to mean.
+  the _idea_ has strong demand, which raises the bar for what "better" needs to mean.
 
 ### 3.2 Weaknesses identified
 
-| # | Weakness | Evidence |
-|---|---|---|
-| 1 | **No real automated test suite.** | Root `package.json`'s `test` script is a placeholder ("no tests configured"), despite `CLAUDE.md` stating a "70%+ coverage" aspiration. Claimed quality bar isn't enforced by CI. |
-| 2 | **Mixed-language toolchain.** | Content indexing (`generate_components_json.py`) is Python inside an otherwise Node.js/JS project — two runtimes, two dependency managers, harder onboarding and CI. |
-| 3 | **Validation is agent-mediated, not machine-enforced.** | New components are checked by asking a `component-reviewer` *agent* to review a checklist manually, rather than a schema (e.g. Zod/JSON Schema) that fails CI automatically on bad frontmatter. |
-| 4 | **Hand-maintained static HTML docs/dashboard pages.** | `docs/` contains hand-authored `component.html`, `plugin.html`, `workflows.html`, `sitemap.xml` — not generated from a content-collection/type-safe pipeline, so they can silently drift from the actual catalog. |
-| 5 | **Heavy, mandatory SaaS coupling for the product to function fully.** | Clerk (auth), Supabase (analytics), Neon (monitoring), Sentry (3 projects), Resend (newsletter), Cloudflare Workers/Pages are all wired into core operation — a contributor cannot run "the whole product" locally without provisioning ~5 external accounts. Not open-source-friendly for self-hosting. |
-| 6 | **No owned design system.** | No shadcn/ui-style primitive layer; UI is assembled per-page in Astro/React without a documented shared component library, risking visual inconsistency as the surface grows. |
-| 7 | **Claude-centric taxonomy, not truly multi-provider.** | "Agents"/"commands"/"hooks"/"mcps" are Claude Code concepts first; Cursor, Copilot, Windsurf, Codex, Aider, Cline, Roo Code, Continue.dev are not first-class, equally-modeled providers in the metadata schema. |
-| 8 | **No keyboard-first UX.** | No documented command palette, no global `⌘K` search-everywhere pattern. |
-| 9 | **No prompt-quality scoring, no template comparison, no version history UI**, despite `version`-like data existing informally in component frontmatter. |
-| 10 | **Collections/bookmarking require authentication** (Clerk-gated `app.aitmpl.com`) — no lightweight, account-free "save for later" for casual visitors. |
-| 11 | **Contribution guidance centers on adding Claude-only components**, not on adding a new *provider* as a taxonomy citizen — makes multi-tool support feel bolted-on rather than designed-in. |
-| 12 | **`devDependencies` absent from root `package.json`** — no visible enforced lint/format/pre-commit tooling at the root, so code-style consistency across 600+ community-contributed components is harder to guarantee automatically. |
+| #   | Weakness                                                                                                                                                                                                                             | Evidence                                                                                                                                                                                                                                                                                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **No real automated test suite.**                                                                                                                                                                                                    | Root `package.json`'s `test` script is a placeholder ("no tests configured"), despite `CLAUDE.md` stating a "70%+ coverage" aspiration. Claimed quality bar isn't enforced by CI.                                                                                                                        |
+| 2   | **Mixed-language toolchain.**                                                                                                                                                                                                        | Content indexing (`generate_components_json.py`) is Python inside an otherwise Node.js/JS project — two runtimes, two dependency managers, harder onboarding and CI.                                                                                                                                     |
+| 3   | **Validation is agent-mediated, not machine-enforced.**                                                                                                                                                                              | New components are checked by asking a `component-reviewer` _agent_ to review a checklist manually, rather than a schema (e.g. Zod/JSON Schema) that fails CI automatically on bad frontmatter.                                                                                                          |
+| 4   | **Hand-maintained static HTML docs/dashboard pages.**                                                                                                                                                                                | `docs/` contains hand-authored `component.html`, `plugin.html`, `workflows.html`, `sitemap.xml` — not generated from a content-collection/type-safe pipeline, so they can silently drift from the actual catalog.                                                                                        |
+| 5   | **Heavy, mandatory SaaS coupling for the product to function fully.**                                                                                                                                                                | Clerk (auth), Supabase (analytics), Neon (monitoring), Sentry (3 projects), Resend (newsletter), Cloudflare Workers/Pages are all wired into core operation — a contributor cannot run "the whole product" locally without provisioning ~5 external accounts. Not open-source-friendly for self-hosting. |
+| 6   | **No owned design system.**                                                                                                                                                                                                          | No shadcn/ui-style primitive layer; UI is assembled per-page in Astro/React without a documented shared component library, risking visual inconsistency as the surface grows.                                                                                                                            |
+| 7   | **Claude-centric taxonomy, not truly multi-provider.**                                                                                                                                                                               | "Agents"/"commands"/"hooks"/"mcps" are Claude Code concepts first; Cursor, Copilot, Windsurf, Codex, Aider, Cline, Roo Code, Continue.dev are not first-class, equally-modeled providers in the metadata schema.                                                                                         |
+| 8   | **No keyboard-first UX.**                                                                                                                                                                                                            | No documented command palette, no global `⌘K` search-everywhere pattern.                                                                                                                                                                                                                                 |
+| 9   | **No prompt-quality scoring, no template comparison, no version history UI**, despite `version`-like data existing informally in component frontmatter.                                                                              |
+| 10  | **Collections/bookmarking require authentication** (Clerk-gated `app.aitmpl.com`) — no lightweight, account-free "save for later" for casual visitors.                                                                               |
+| 11  | **Contribution guidance centers on adding Claude-only components**, not on adding a new _provider_ as a taxonomy citizen — makes multi-tool support feel bolted-on rather than designed-in.                                          |
+| 12  | **`devDependencies` absent from root `package.json`** — no visible enforced lint/format/pre-commit tooling at the root, so code-style consistency across 600+ community-contributed components is harder to guarantee automatically. |
 
 ### 3.3 What it does well (worth learning from, not copying)
 
@@ -64,11 +64,11 @@ Findings below are from direct inspection of the public repository (README, `CLA
   large catalog — we achieve the same effect through a typed, build-time content pipeline
   instead of a hand-run script.
 - **Security scanning as a CI gate** (a static analyzer blocking HIGH/CRITICAL findings on
-  PRs) is good practice — we adopt the *principle* (automated, blocking, PR-scoped security
+  PRs) is good practice — we adopt the _principle_ (automated, blocking, PR-scoped security
   scanning) via CodeQL + secret scanning + Dependabot, framework-agnostic.
 - **Community engagement loops** (weekly KPI "pulse," a newsletter highlighting trending
   components, a Discord bot for `/search /info /install /popular`) are smart growth features
-  worth designing *for* in our extensibility seams, even though they're out of scope for the
+  worth designing _for_ in our extensibility seams, even though they're out of scope for the
   initial OSS release.
 
 ### 3.4 Missing features we will add
@@ -78,8 +78,8 @@ Findings below are from direct inspection of the public repository (README, `CLA
 - A real **command palette** for search-everywhere and navigation.
 - **Template comparison** (side-by-side diff of two templates).
 - **Prompt Playground** with live preview and variable substitution.
-- **Prompt quality scoring** and automated template validation feedback shown *on the template
-  page*, not just in a contributor checklist.
+- **Prompt quality scoring** and automated template validation feedback shown _on the template
+  page_, not just in a contributor checklist.
 - **Account-free bookmarking** (local storage) with an upgrade path to synced collections once
   auth ships.
 - Fully automated, CI-enforced **content validation** (Zod) with clear, actionable error
@@ -89,17 +89,17 @@ Findings below are from direct inspection of the public repository (README, `CLA
 
 ## 4. Comparison summary
 
-| Dimension | Inspiration project | AI-TEMPLATE |
-|---|---|---|
-| Runtime/toolchain | Node.js CLI + Python indexing script + Astro dashboard | Single TypeScript monorepo (Next.js + pnpm workspaces) |
-| Content validation | Manual/agent-reviewed | Zod-schema-enforced, CI-blocking |
-| Design system | Ad hoc per-page (Astro/React) | Owned shadcn/ui-based primitive layer, one design language |
-| Provider model | Claude-Code-centric | Provider-agnostic taxonomy (11+ tools as equal citizens) |
-| Core function needs external SaaS? | Yes (Clerk/Supabase/Neon/Sentry/Cloudflare) | No — core browse/search/read works with zero accounts |
-| Testing | Placeholder test script | Vitest + Playwright + axe-core, CI-gated |
-| Docs | Hand-written static HTML | MDX + content collections, type-safe, can't drift from data |
-| Search UX | Dashboard search box | Command palette, faceted sidebar, URL-synced, instant client search |
-| Accessibility/perf targets | Not documented | Lighthouse 100 / WCAG 2.1 AA, CI-enforced budget |
+| Dimension                          | Inspiration project                                    | AI-TEMPLATE                                                         |
+| ---------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------- |
+| Runtime/toolchain                  | Node.js CLI + Python indexing script + Astro dashboard | Single TypeScript monorepo (Next.js + pnpm workspaces)              |
+| Content validation                 | Manual/agent-reviewed                                  | Zod-schema-enforced, CI-blocking                                    |
+| Design system                      | Ad hoc per-page (Astro/React)                          | Owned shadcn/ui-based primitive layer, one design language          |
+| Provider model                     | Claude-Code-centric                                    | Provider-agnostic taxonomy (11+ tools as equal citizens)            |
+| Core function needs external SaaS? | Yes (Clerk/Supabase/Neon/Sentry/Cloudflare)            | No — core browse/search/read works with zero accounts               |
+| Testing                            | Placeholder test script                                | Vitest + Playwright + axe-core, CI-gated                            |
+| Docs                               | Hand-written static HTML                               | MDX + content collections, type-safe, can't drift from data         |
+| Search UX                          | Dashboard search box                                   | Command palette, faceted sidebar, URL-synced, instant client search |
+| Accessibility/perf targets         | Not documented                                         | Lighthouse 100 / WCAG 2.1 AA, CI-enforced budget                    |
 
 ## 5. Feature roadmap (post-foundation)
 

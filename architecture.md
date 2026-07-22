@@ -30,21 +30,21 @@ audit):
 
 ## 2. Technology stack
 
-| Concern | Choice | Why |
-|---|---|---|
-| Framework | Next.js 15 (App Router) | Server Components, streaming, ISR/SSG for template pages, edge-ready |
-| Language | TypeScript (strict mode) | No `any`, no implicit returns, compiler is a linter |
-| Styling | Tailwind CSS v4 | Utility-first, themeable via CSS variables (white/blue theme + dark mode) |
-| Components | shadcn/ui (owned, not a dependency) | Copy-in primitives we control and can restyle — no black-box design system |
-| Motion | Framer Motion | Page transitions, hero animation, command palette open/close, skeleton fades |
-| Validation | Zod | Single source of truth for template frontmatter, form input, API boundaries |
-| Data fetching | React Query (TanStack Query) | Client-side cache for search/filter state, optimistic bookmarking (future) |
-| Content | MDX + Content Collections (Velite) | Type-safe content layer: `.md`/`.mdx` + frontmatter → typed, validated, tree-shaken JSON at build time |
-| Search | Local search index (FlexSearch) + URL-synced filters | No external search SaaS required for core search to work |
-| Testing | Vitest (unit/component), Playwright (e2e + a11y via `@axe-core/playwright`) | Real coverage, real CI gates |
-| Quality | ESLint, Prettier, Husky, lint-staged | Enforced pre-commit and in CI, not just documented |
-| CI/CD | GitHub Actions | Lint, typecheck, test, build, Lighthouse CI, CodeQL, preview deploys |
-| Package management | pnpm workspaces (monorepo) | `apps/web`, `packages/content`, `packages/ui`, `packages/config` as isolated, independently testable units |
+| Concern            | Choice                                                                      | Why                                                                                                        |
+| ------------------ | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Framework          | Next.js 15 (App Router)                                                     | Server Components, streaming, ISR/SSG for template pages, edge-ready                                       |
+| Language           | TypeScript (strict mode)                                                    | No `any`, no implicit returns, compiler is a linter                                                        |
+| Styling            | Tailwind CSS v4                                                             | Utility-first, themeable via CSS variables (white/blue theme + dark mode)                                  |
+| Components         | shadcn/ui (owned, not a dependency)                                         | Copy-in primitives we control and can restyle — no black-box design system                                 |
+| Motion             | Framer Motion                                                               | Page transitions, hero animation, command palette open/close, skeleton fades                               |
+| Validation         | Zod                                                                         | Single source of truth for template frontmatter, form input, API boundaries                                |
+| Data fetching      | React Query (TanStack Query)                                                | Client-side cache for search/filter state, optimistic bookmarking (future)                                 |
+| Content            | MDX + Content Collections (Velite)                                          | Type-safe content layer: `.md`/`.mdx` + frontmatter → typed, validated, tree-shaken JSON at build time     |
+| Search             | Local search index (FlexSearch) + URL-synced filters                        | No external search SaaS required for core search to work                                                   |
+| Testing            | Vitest (unit/component), Playwright (e2e + a11y via `@axe-core/playwright`) | Real coverage, real CI gates                                                                               |
+| Quality            | ESLint, Prettier, Husky, lint-staged                                        | Enforced pre-commit and in CI, not just documented                                                         |
+| CI/CD              | GitHub Actions                                                              | Lint, typecheck, test, build, Lighthouse CI, CodeQL, preview deploys                                       |
+| Package management | pnpm workspaces (monorepo)                                                  | `apps/web`, `packages/content`, `packages/ui`, `packages/config` as isolated, independently testable units |
 
 Every one of these is a plain, self-hostable choice. There is no required external account
 to develop, build, test, or run the app locally.
@@ -125,16 +125,34 @@ export const TemplateMeta = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   title: z.string().min(3).max(80),
   description: z.string().min(20).max(240),
-  author: z.object({ name: z.string(), url: z.string().url().optional(), github: z.string().optional() }),
+  author: z.object({
+    name: z.string(),
+    url: z.string().url().optional(),
+    github: z.string().optional(),
+  }),
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
-  compatibility: z.array(z.enum([
-    "claude-code", "cursor", "openai", "gemini", "copilot",
-    "windsurf", "codex", "aider", "cline", "roo-code", "continue-dev", "custom",
-  ])).min(1),
+  compatibility: z
+    .array(
+      z.enum([
+        "claude-code",
+        "cursor",
+        "openai",
+        "gemini",
+        "copilot",
+        "windsurf",
+        "codex",
+        "aider",
+        "cline",
+        "roo-code",
+        "continue-dev",
+        "custom",
+      ]),
+    )
+    .min(1),
   tags: z.array(z.string()).max(12),
   category: z.string(),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]),
-  license: z.string(),                // SPDX identifier
+  license: z.string(), // SPDX identifier
   useCases: z.array(z.string()),
   bestPractices: z.array(z.string()).optional(),
   limitations: z.array(z.string()).optional(),
@@ -182,7 +200,7 @@ copy-paste-and-edit-and-hope-it-validates friction.
   (sub-frame) results with zero network round-trip; the current query/filter state is
   synced to the URL (`?q=&provider=&category=&difficulty=&sort=`) via `nuqs`, so results are
   shareable, back-button-safe, and SSR-hydratable on first load.
-- **React Query** manages any client state that *does* need a network call (future: ratings,
+- **React Query** manages any client state that _does_ need a network call (future: ratings,
   comments, saved collections) with cache invalidation and optimistic updates — kept out of
   the critical path for template browsing itself.
 
@@ -219,14 +237,14 @@ rewritten to accommodate them:
 
 ## 8. Testing strategy
 
-| Layer | Tool | What it covers |
-|---|---|---|
-| Unit | Vitest | Zod schemas, utils, search index builder, content pipeline |
-| Component | Vitest + Testing Library | Interactive components (filters, command palette, copy button) in isolation |
-| Integration | Vitest | Content Collections build against fixture templates (valid + intentionally invalid) |
-| E2E | Playwright | Golden paths: search → filter → open template → copy prompt; command palette flow; dark mode toggle |
-| Accessibility | Playwright + axe-core | Automated WCAG 2.1 AA checks on every route in CI |
-| Performance | Lighthouse CI | Budget-enforced (fail under 95) on PR preview deploys |
+| Layer         | Tool                     | What it covers                                                                                      |
+| ------------- | ------------------------ | --------------------------------------------------------------------------------------------------- |
+| Unit          | Vitest                   | Zod schemas, utils, search index builder, content pipeline                                          |
+| Component     | Vitest + Testing Library | Interactive components (filters, command palette, copy button) in isolation                         |
+| Integration   | Vitest                   | Content Collections build against fixture templates (valid + intentionally invalid)                 |
+| E2E           | Playwright               | Golden paths: search → filter → open template → copy prompt; command palette flow; dark mode toggle |
+| Accessibility | Playwright + axe-core    | Automated WCAG 2.1 AA checks on every route in CI                                                   |
+| Performance   | Lighthouse CI            | Budget-enforced (fail under 95) on PR preview deploys                                               |
 
 ## 9. CI/CD pipeline (GitHub Actions)
 
@@ -253,5 +271,6 @@ rewritten to accommodate them:
   render-blocking Google Fonts request).
 
 ---
+
 See `roadmap.md` for the comparative audit this design responds to, and
 `implementation-phases.md` for the ordered execution plan.

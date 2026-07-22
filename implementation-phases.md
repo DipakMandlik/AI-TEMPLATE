@@ -34,7 +34,7 @@ scaffolding exists.
 - Decide hosting target for previews (Vercel) vs. self-host instructions (Docker/Node).
 - Write ADRs (`docs/adr/0001-monorepo-tool.md`, `0002-content-pipeline.md`,
   `0003-design-system.md`, `0004-search-strategy.md`) — short, dated, reversible-decision
-  records so future contributors know *why*, not just *what*.
+  records so future contributors know _why_, not just _what_.
 
 **Exit criteria:** ADRs merged. No open architectural question blocks Phase 3.
 
