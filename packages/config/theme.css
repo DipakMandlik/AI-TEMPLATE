@@ -82,4 +82,12 @@
   --shadow-soft-sm: var(--shadow-soft-sm);
   --shadow-soft-md: var(--shadow-soft-md);
   --shadow-soft-lg: var(--shadow-soft-lg);
+
+  --animate-shimmer: shimmer 1.6s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
