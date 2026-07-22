@@ -1,0 +1,1 @@
+export { getTemplatesRoot } from "./paths";

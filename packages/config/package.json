@@ -1,0 +1,14 @@
+{
+  "name": "@ai-template/config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared TypeScript config and Tailwind v4 theme tokens for the AI-TEMPLATE monorepo.",
+  "files": [
+    "tsconfig.base.json",
+    "theme.css"
+  ],
+  "exports": {
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./theme.css": "./theme.css"
+  }
+}
