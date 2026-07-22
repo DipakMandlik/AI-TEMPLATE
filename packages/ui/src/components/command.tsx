@@ -27,12 +27,15 @@ export interface CommandDialogProps extends React.ComponentPropsWithoutRef<
 > {
   title?: string;
   description?: string;
+  /** Set to false when the consumer drives its own filtering (e.g. a custom search index). */
+  shouldFilter?: boolean;
 }
 
 export function CommandDialog({
   children,
   title = "Command palette",
   description = "Search templates and jump to any page",
+  shouldFilter = true,
   ...props
 }: CommandDialogProps) {
   return (
@@ -51,7 +54,7 @@ export function CommandDialog({
           <DialogPrimitive.Description className="sr-only">
             {description}
           </DialogPrimitive.Description>
-          <Command shouldFilter loop>
+          <Command shouldFilter={shouldFilter} loop>
             {children}
           </Command>
         </DialogPrimitive.Content>
