@@ -7,7 +7,6 @@ const FOOTER_LINKS = [
       { label: "Templates", href: "/templates" },
       { label: "Categories", href: "/categories" },
       { label: "Docs", href: "/docs" },
-      { label: "RSS Feed", href: "/feed.xml" },
     ],
   },
   {
@@ -55,6 +54,19 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
+              {section.heading === "Product" ? (
+                <li>
+                  {/* Plain anchor, not next/link — /feed.xml is a Route Handler,
+                      not a page, and Link's RSC prefetch 404s against it. Manually
+                      basePath-prefixed since plain anchors don't get that for free. */}
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/feed.xml`}
+                    className="text-sm text-[var(--color-muted)] transition-colors hover:text-[var(--color-foreground)]"
+                  >
+                    RSS Feed
+                  </a>
+                </li>
+              ) : null}
             </ul>
           </div>
         ))}

@@ -1,9 +1,12 @@
 import { ImageResponse } from "next/og";
 
-export const size = { width: 180, height: 180 };
-export const contentType = "image/png";
+// Served at an explicit path (not the `apple-icon` file convention) because
+// Next's auto-generated favicon <link> href isn't basePath-prefixed under
+// `output: "export"` — see the manual `icons` entry in app/layout.tsx, which
+// resolves against `metadataBase` (already basePath-aware) instead.
+export const dynamic = "force-static";
 
-export default function AppleIcon() {
+export function GET() {
   return new ImageResponse(
     <div
       style={{
@@ -21,6 +24,6 @@ export default function AppleIcon() {
     >
       A
     </div>,
-    { ...size },
+    { width: 180, height: 180 },
   );
 }

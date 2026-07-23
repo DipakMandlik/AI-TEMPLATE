@@ -1,6 +1,11 @@
 import { templates } from "@ai-template/content";
 import { SITE_URL } from "../../lib/site";
 
+// Required for `output: "export"` (GitHub Pages builds) — without it, Next
+// refuses to include a Route Handler in a static export even though this
+// one has no per-request logic at all (see feed.xml/route.ts's GET below).
+export const dynamic = "force-static";
+
 function escapeXml(value: string): string {
   return value
     .replace(/&/g, "&amp;")

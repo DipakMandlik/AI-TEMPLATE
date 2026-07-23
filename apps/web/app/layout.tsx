@@ -31,6 +31,13 @@ export const metadata: Metadata = {
     canonical: "/",
     types: { "application/rss+xml": "/feed.xml" },
   },
+  // Absolute URLs (not the `icon`/`apple-icon` file convention) so the
+  // favicon links resolve through metadataBase — see the route comments in
+  // app/favicon.png/route.tsx for why.
+  icons: {
+    icon: `${SITE_URL}/favicon.png`,
+    apple: `${SITE_URL}/apple-touch-icon.png`,
+  },
   openGraph: {
     type: "website",
     siteName: "AI-TEMPLATE",

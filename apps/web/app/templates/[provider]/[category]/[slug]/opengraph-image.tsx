@@ -2,6 +2,9 @@ import { templates } from "@ai-template/content";
 import { PROVIDER_LABELS, type Provider } from "@ai-template/validation";
 import { ImageResponse } from "next/og";
 
+// Required for `output: "export"` (GitHub Pages builds) — this route has no
+// per-request logic beyond generateStaticParams below.
+export const dynamic = "force-static";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

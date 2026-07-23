@@ -1,5 +1,8 @@
 import { ImageResponse } from "next/og";
 
+// Required for `output: "export"` (GitHub Pages builds) — this route has no
+// per-request logic, but Next still needs the explicit opt-in.
+export const dynamic = "force-static";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

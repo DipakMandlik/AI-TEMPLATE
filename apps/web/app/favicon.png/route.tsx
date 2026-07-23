@@ -1,9 +1,12 @@
 import { ImageResponse } from "next/og";
 
-export const size = { width: 32, height: 32 };
-export const contentType = "image/png";
+// Served at an explicit path (not the `icon` file convention) because Next's
+// auto-generated favicon <link> href isn't basePath-prefixed under
+// `output: "export"` — see the manual `icons` entry in app/layout.tsx, which
+// resolves against `metadataBase` (already basePath-aware) instead.
+export const dynamic = "force-static";
 
-export default function Icon() {
+export function GET() {
   return new ImageResponse(
     <div
       style={{
@@ -22,6 +25,6 @@ export default function Icon() {
     >
       A
     </div>,
-    { ...size },
+    { width: 32, height: 32 },
   );
 }

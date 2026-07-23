@@ -24,8 +24,8 @@ export default defineConfig({
         "app/**/robots.ts",
         "app/**/opengraph-image.tsx",
         "app/**/twitter-image.tsx",
-        "app/icon.tsx",
-        "app/apple-icon.tsx",
+        "app/favicon.png/route.tsx",
+        "app/apple-touch-icon.png/route.tsx",
         "app/feed.xml/route.ts",
         // Thin MDX runtime + presentational shell components, exercised by
         // e2e on every real page (every route renders the header/footer;
@@ -37,6 +37,11 @@ export default defineConfig({
         // Orchestrates the already-unit-tested facet/compare/search pieces;
         // covered end-to-end by the golden-path and comparison e2e specs.
         "features/templates/templates-explorer.tsx",
+        // Client-Component render shell for /compare (searchParams read +
+        // JSX) — the resolveTemplates/compare logic it uses is already unit
+        // tested (compare.ts); this file itself is covered by the e2e
+        // comparison flow spec.
+        "features/templates/compare-view.tsx",
       ],
       thresholds: {
         statements: 85,
