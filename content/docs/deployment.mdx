@@ -1,6 +1,6 @@
 ---
 title: Deployment
-description: Self-hosting with plain Node.js, or deploying to Vercel — both from the same production build.
+description: Self-hosting with plain Node.js, deploying to Vercel, or publishing a static export to GitHub Pages.
 order: 8
 ---
 
@@ -46,6 +46,46 @@ This is a standard Next.js app inside a pnpm monorepo, which Vercel supports nat
    `@ai-template/content`'s build step runs before `next build`.)
 
 No environment variables are required for the core product to run.
+
+## Deploying to GitHub Pages
+
+GitHub Pages has no server, so this target builds a fully static export instead of the default
+server build. `.github/workflows/deploy-pages.yml` does this automatically on every push to
+`main`:
+
+1. It sets `GITHUB_PAGES=true`, which switches `apps/web/next.config.ts` to
+   `output: "export"` and adds the `basePath`/`assetPrefix` needed for a project site served
+   from `https://<owner>.github.io/AI-TEMPLATE/` (a subpath, not the domain root).
+2. It sets `NEXT_PUBLIC_SITE_URL` from `actions/configure-pages`' detected origin and base path,
+   so the sitemap, RSS feed, canonical URLs, and OG images resolve to the real GitHub Pages URL.
+3. It uploads `apps/web/out` (the static export) and publishes it with `actions/deploy-pages`.
+
+**One-time manual step** (the workflow can't do this on its own): in the repository's
+**Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. Once that's
+set, every push to `main` redeploys the site.
+
+To build the same export locally:
+
+```md
+GITHUB_PAGES=true NEXT_PUBLIC_SITE_URL=https://<owner>.github.io/AI-TEMPLATE pnpm --filter web build
+```
+
+The static export is written to `apps/web/out/`. A few static-export constraints this app
+already accounts for, in case you extend it:
+
+- Route Handlers and file-convention metadata routes (`sitemap.ts`, `robots.ts`, `feed.xml`,
+  `opengraph-image.tsx`, etc.) each need an explicit `export const dynamic = "force-static";` —
+  Next won't include them in a static export otherwise.
+- Pages that read search params must do it client-side with `useSearchParams()` (see
+  `features/templates/compare-view.tsx`), since static export has no server to read a request's
+  query string from.
+- Plain `<a>` tags, not `next/link`, are used for links to Route Handlers like `/feed.xml` —
+  `Link` tries to RSC-prefetch its target as if it were a page, which 404s against a Route
+  Handler. The favicon and apple-touch-icon are served from explicit routes
+  (`app/favicon.png/route.tsx`, `app/apple-touch-icon.png/route.tsx`) and referenced via
+  `metadata.icons` in `app/layout.tsx` for the same reason — Next's auto-generated favicon
+  `<link>` from the `icon`/`apple-icon` file convention isn't `basePath`-prefixed under
+  `output: "export"`.
 
 ## Optional: NEXT_PUBLIC_SITE_URL
 

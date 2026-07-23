@@ -15,7 +15,7 @@ Gemini, OpenAI, and custom agents — searchable, versioned, and schema-validate
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 
-[Browse templates](https://github.com/DipakMandlik/AI-TEMPLATE) ·
+[Live site](https://dipakmandlik.github.io/AI-TEMPLATE/) ·
 [Documentation](./content/docs/getting-started.mdx) ·
 [Contributing](./CONTRIBUTING.md) ·
 [Roadmap](./roadmap.md)
